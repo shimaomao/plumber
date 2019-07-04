@@ -29,17 +29,25 @@ public class BinaryLogClientServiceTest extends PlumberApplicationTests {
         auth.setPassword("Pubmi@2016");
         binaryLogClientService.create(auth);
 
-        UpdateEventHandlerImpl updateEventHandler = new UpdateEventHandlerImpl();
         TableMapEventHandlerImpl tableMapEventHandler = new TableMapEventHandlerImpl();
 
-        updateEventHandler.setDatabase("pubmidb");
-        updateEventHandler.setTable("tbl_member");
-        updateEventHandler.setStatus(true);
+        UpdateEventHandlerImpl updateEventHandlerMember = new UpdateEventHandlerImpl();
+        updateEventHandlerMember.setDatabase("pubmidb");
+        updateEventHandlerMember.setTable("tbl_member");
+        updateEventHandlerMember.setStatus(true);
+
+        UpdateEventHandlerImpl updateEventHandlerPaymentBill = new UpdateEventHandlerImpl();
+        updateEventHandlerPaymentBill.setDatabase("pubmidb");
+        updateEventHandlerPaymentBill.setTable("tbl_payment_bill");
+        updateEventHandlerPaymentBill.setStatus(true);
 
         binaryLogClientService.registEventHandler(auth, tableMapEventHandler);
-        binaryLogClientService.registEventHandler(auth, updateEventHandler);
+        binaryLogClientService.registEventHandler(auth, updateEventHandlerMember);
+        binaryLogClientService.registEventHandler(auth, updateEventHandlerPaymentBill);
 
-        updateEventHandler.initMateDate(false);
+        updateEventHandlerMember.initMateDate(false);
+        updateEventHandlerPaymentBill.initMateDate(false);
+
 
         binaryLogClientService.start(auth);
     }

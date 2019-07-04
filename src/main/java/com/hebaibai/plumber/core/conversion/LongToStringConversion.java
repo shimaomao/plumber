@@ -7,15 +7,15 @@ public class LongToStringConversion implements Conversion<String> {
 
     @Override
     public boolean support(Class to, Class from) {
-        boolean isLong = from == long.class || from == Long.class;
-        if (to == String.class && isLong) {
+        boolean canConversion = from == long.class || from == Long.class;
+        if (to == String.class && canConversion) {
             return true;
         }
         return false;
     }
 
     @Override
-    public String conversion(Object aLong) {
-        return String.valueOf(aLong);
+    public String conversion(Object obj) {
+        return String.valueOf(obj);
     }
 }

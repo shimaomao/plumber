@@ -1,13 +1,15 @@
 package com.hebaibai.plumber.core.conversion;
 
+import java.math.BigDecimal;
+
 /**
- * 从 int 转换为 String
+ * 从 BigDecimal 转换为 String
  */
-public class IntToStringConversion implements Conversion<String> {
+public class BigDecimalToStringConversion implements Conversion<String> {
 
     @Override
     public boolean support(Class to, Class from) {
-        boolean canConversion = from == int.class || from == Integer.class;
+        boolean canConversion = from == BigDecimal.class;
         if (to == String.class && canConversion) {
             return true;
         }

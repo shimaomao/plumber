@@ -14,10 +14,7 @@ public class BytesToStringConversion implements Conversion<String> {
     }
 
     @Override
-    public String conversion(Object bytes) {
-        if (bytes instanceof byte[]) {
-            return new String((byte[]) bytes);
-        }
-        throw new UnsupportedOperationException();
+    public String conversion(Object obj) {
+        return new String((byte[]) obj);
     }
 }
