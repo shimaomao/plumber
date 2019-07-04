@@ -1,7 +1,8 @@
-package com.hebaibai.plumber.core;
+package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.hebaibai.plumber.core.Auth;
 
 /**
  * @author hjx

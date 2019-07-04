@@ -5,6 +5,7 @@ import com.github.shyiko.mysql.binlog.event.Event;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import java.util.concurrent.ExecutorService;
  * @author hjx
  */
 @Slf4j
-class EventDistributeListener implements BinaryLogClient.EventListener {
+class AuthEventListener implements BinaryLogClient.EventListener {
 
     private ExecutorService executorService;
 
@@ -56,7 +57,7 @@ class EventDistributeListener implements BinaryLogClient.EventListener {
     }
 
 
-    public EventDistributeListener(Auth auth, ExecutorService executorService) {
+    public AuthEventListener(Auth auth, ExecutorService executorService) {
         this.executorService = executorService;
         this.auth = auth;
     }

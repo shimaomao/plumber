@@ -2,6 +2,7 @@ package com.hebaibai.plumber.core;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
+import com.hebaibai.plumber.core.handler.EventHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,7 +13,7 @@ import java.util.concurrent.ExecutorService;
  * 一个实例
  */
 @Slf4j
-class BinaryLogApp implements Runnable {
+class AuthBinaryLogApp implements Runnable {
 
     /**
      * 兼容模式
@@ -41,13 +42,13 @@ class BinaryLogApp implements Runnable {
 
     private BinaryLogClient binaryLogClient;
 
-    private EventDistributeListener eventDistributeListener;
+    private AuthEventListener authEventListener;
 
-    public BinaryLogApp(Auth auth, ExecutorService executorService) {
+    public AuthBinaryLogApp(Auth auth, ExecutorService executorService) {
         this.auth = auth;
         this.executorService = executorService;
 
-        this.eventDistributeListener = new EventDistributeListener(auth,executorService);
+        this.authEventListener = new AuthEventListener(auth,executorService);
         this.binaryLogClient = new BinaryLogClient(
                 auth.getHostname(),
                 auth.getPort(),
@@ -55,7 +56,7 @@ class BinaryLogApp implements Runnable {
                 auth.getPassword()
         );
         this.binaryLogClient.setEventDeserializer(eventDeserializer);
-        this.binaryLogClient.registerEventListener(this.eventDistributeListener);
+        this.binaryLogClient.registerEventListener(this.authEventListener);
     }
 
 
@@ -90,6 +91,6 @@ class BinaryLogApp implements Runnable {
 
 
     public void registEventHandler(EventHandler handle) {
-        this.eventDistributeListener.getEventHandlers().add(handle);
+        this.authEventListener.getEventHandlers().add(handle);
     }
 }

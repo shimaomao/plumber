@@ -3,7 +3,6 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
-import com.hebaibai.plumber.core.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import lombok.extern.slf4j.Slf4j;
 

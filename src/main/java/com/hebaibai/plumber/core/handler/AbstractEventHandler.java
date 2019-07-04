@@ -1,7 +1,6 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.hebaibai.plumber.core.Auth;
-import com.hebaibai.plumber.core.EventHandler;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import lombok.Getter;

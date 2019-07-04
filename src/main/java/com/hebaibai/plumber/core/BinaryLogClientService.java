@@ -1,5 +1,6 @@
 package com.hebaibai.plumber.core;
 
+import com.hebaibai.plumber.core.handler.EventHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class BinaryLogClientService {
     /**
      * 保存的认证信息
      */
-    private Map<Auth, BinaryLogApp> binaryLogAppMap = new HashMap<>();
+    private Map<Auth, AuthBinaryLogApp> binaryLogAppMap = new HashMap<>();
 
     @Autowired
     private ExecutorService executorService;
@@ -33,8 +34,8 @@ public class BinaryLogClientService {
         if (binaryLogAppMap.containsKey(auth)) {
             throw new UnsupportedOperationException(auth.getHostname() + "已经存在");
         }
-        BinaryLogApp binaryLogApp = new BinaryLogApp(auth, executorService);
-        binaryLogAppMap.put(auth, binaryLogApp);
+        AuthBinaryLogApp authBinaryLogApp = new AuthBinaryLogApp(auth, executorService);
+        binaryLogAppMap.put(auth, authBinaryLogApp);
     }
 
     /**
@@ -45,9 +46,9 @@ public class BinaryLogClientService {
      */
     public void start(Auth auth) {
         hasAuth(auth);
-        BinaryLogApp binaryLogApp = binaryLogAppMap.get(auth);
-        binaryLogApp.start();
-        executorService.execute(binaryLogApp);
+        AuthBinaryLogApp authBinaryLogApp = binaryLogAppMap.get(auth);
+        authBinaryLogApp.start();
+        executorService.execute(authBinaryLogApp);
     }
 
     /**
@@ -58,8 +59,8 @@ public class BinaryLogClientService {
      */
     public void stop(Auth auth) {
         hasAuth(auth);
-        BinaryLogApp binaryLogApp = binaryLogAppMap.get(auth);
-        binaryLogApp.stop();
+        AuthBinaryLogApp authBinaryLogApp = binaryLogAppMap.get(auth);
+        authBinaryLogApp.stop();
     }
 
 
@@ -71,9 +72,9 @@ public class BinaryLogClientService {
      */
     public void registEventHandler(Auth auth, EventHandler handle) {
         hasAuth(auth);
-        BinaryLogApp binaryLogApp = binaryLogAppMap.get(auth);
+        AuthBinaryLogApp authBinaryLogApp = binaryLogAppMap.get(auth);
         handle.setAuth(auth);
-        binaryLogApp.registEventHandler(handle);
+        authBinaryLogApp.registEventHandler(handle);
     }
 
     private void hasAuth(Auth auth) {
