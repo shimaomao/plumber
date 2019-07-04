@@ -3,6 +3,7 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.core.Auth;
+import com.hebaibai.plumber.core.TargetTable;
 
 /**
  * @author hjx
@@ -45,4 +46,10 @@ public interface EventHandler {
      */
     String getName();
 
+    /**
+     * 设置目标数据表
+     *
+     * @param targetTable
+     */
+    void setTargetTable(TargetTable targetTable);
 }

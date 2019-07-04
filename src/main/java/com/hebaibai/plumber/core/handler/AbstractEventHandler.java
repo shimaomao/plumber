@@ -1,6 +1,7 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.hebaibai.plumber.core.Auth;
+import com.hebaibai.plumber.core.TargetTable;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -24,6 +26,8 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected Auth auth;
 
+    protected TargetTable targetTable;
+
     protected TableMateData tableMateData;
 
     @Override
@@ -34,6 +38,11 @@ public abstract class AbstractEventHandler implements EventHandler {
     @Override
     public void setStatus(boolean isRun) {
         this.status = isRun;
+    }
+
+    @Override
+    public void setTargetTable(TargetTable targetTable) {
+        this.targetTable = targetTable;
     }
 
     /**
