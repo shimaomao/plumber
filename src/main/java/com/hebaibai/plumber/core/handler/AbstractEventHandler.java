@@ -10,6 +10,11 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * 公用默认实现
+ *
+ * @author hjx
+ */
 @Slf4j
 public abstract class AbstractEventHandler implements EventHandler {
 

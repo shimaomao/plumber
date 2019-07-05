@@ -23,8 +23,6 @@ class AuthBinaryLogApp implements Runnable {
     static {
         eventDeserializer = new EventDeserializer();
         eventDeserializer.setCompatibilityMode(
-                //date 和 time 类型数据 转换为long
-                EventDeserializer.CompatibilityMode.DATE_AND_TIME_AS_LONG,
                 //char 和 binary 类型数据转换为 byte[]
                 EventDeserializer.CompatibilityMode.CHAR_AND_BINARY_AS_BYTE_ARRAY
         );
@@ -48,7 +46,7 @@ class AuthBinaryLogApp implements Runnable {
         this.auth = auth;
         this.executorService = executorService;
 
-        this.authEventListener = new AuthEventListener(auth,executorService);
+        this.authEventListener = new AuthEventListener(auth, executorService);
         this.binaryLogClient = new BinaryLogClient(
                 auth.getHostname(),
                 auth.getPort(),

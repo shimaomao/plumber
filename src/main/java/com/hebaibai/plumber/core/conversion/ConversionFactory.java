@@ -14,6 +14,8 @@ import java.util.List;
 public class ConversionFactory {
 
     private static final List<Conversion> CONVERSION_LIST = Arrays.asList(
+            new StringlToStringConversion(),
+            new TimestampToStringConversion(),
             new BigDecimalToStringConversion(),
             new BytesToStringConversion(),
             new IntToStringConversion(),
