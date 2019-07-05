@@ -7,7 +7,6 @@ import com.hebaibai.plumber.core.utils.EventDataUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
-import java.sql.Array;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -58,6 +57,7 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
             eventHandler.targetDatabase = database;
             eventHandler.targetTable = table;
             eventHandler.targetTableMateData = this.targetTableMateData;
+            eventHandler.jdbcTemplate = this.jdbcTemplate;
         }
     }
 
@@ -94,23 +94,21 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
     }
 
     @Override
-    public void handle(EventData data) {
+    public Runnable handle(EventData data) {
         //插入事件
         if (EventDataUtils.getWriteRowsEventData(data) != null) {
-            this.eventHandlers.get(0).handle(data);
-            return;
+            return this.eventHandlers.get(0).handle(data);
         }
         //更新事件
         else if (EventDataUtils.getUpdateRowsEventData(data) != null) {
-            this.eventHandlers.get(1).handle(data);
-            return;
+            return this.eventHandlers.get(1).handle(data);
         }
         //删除事件
         else if (EventDataUtils.getDeleteRowsEventData(data) != null) {
             this.eventHandlers.get(2).handle(data);
-            return;
+            return this.eventHandlers.get(1).handle(data);
         }
-
         log.error("不支持的操作");
+        return null;
     }
 }

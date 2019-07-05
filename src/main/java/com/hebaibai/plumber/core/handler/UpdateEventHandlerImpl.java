@@ -32,7 +32,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
     }
 
     @Override
-    public void handle(EventData data) {
+    public Runnable handle(EventData data) {
 
         log.info("new event update ... ");
         String[] befor = EventDataUtils.getBeforUpdate(data);
@@ -62,7 +62,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         }
 
         if (updateColumns.size() == 0) {
-            return;
+            return null;
         }
 
         //拼装sql
@@ -72,7 +72,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" WHERE ");
         sqlBuilder.append(String.join("AND ", updateKeyColumns));
         String sql = sqlBuilder.toString();
-        log.info(sql);
+        return sqlRunnable(sql);
     }
 
     @Override

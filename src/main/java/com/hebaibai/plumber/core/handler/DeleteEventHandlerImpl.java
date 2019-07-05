@@ -28,7 +28,7 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
     }
 
     @Override
-    public void handle(EventData data) {
+    public Runnable handle(EventData data) {
         log.info("new event delete ... ");
         String[] rows = EventDataUtils.getDeleteRows(data);
         List<String> columns = sourceTableMateData.getColumns();
@@ -52,8 +52,7 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" WHERE ");
         sqlBuilder.append(String.join("and ", wheres));
         String sql = sqlBuilder.toString();
-        log.info(sql);
-
+        return sqlRunnable(sql);
     }
 
     @Override

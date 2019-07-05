@@ -50,8 +50,12 @@ class AuthEventListener implements BinaryLogClient.EventListener {
         String databaseName = auth.getDatabaseName(tableId);
         for (EventHandler handle : eventHandlers) {
             boolean support = handle.support(eventType, databaseName, tableName);
-            if (support) {
-                handle.handle(data);
+            if (!support) {
+                continue;
+            }
+            Runnable runnable = handle.handle(data);
+            if (runnable == null) {
+                executorService.execute(runnable);
             }
         }
     }

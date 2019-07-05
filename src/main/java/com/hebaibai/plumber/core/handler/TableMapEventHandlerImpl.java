@@ -33,13 +33,14 @@ public class TableMapEventHandlerImpl extends AbstractEventHandler implements Ev
     }
 
     @Override
-    public void handle(EventData data) {
+    public Runnable handle(EventData data) {
         TableMapEventData tableMapEventData = EventDataUtils.getTableMapEventData(data);
         long tableId = tableMapEventData.getTableId();
         String tableName = tableMapEventData.getTable();
         String databaseName = tableMapEventData.getDatabase();
         auth.seveTableName(tableId, tableName);
         auth.seveDatabaseName(tableId, databaseName);
+        return null;
     }
 
 

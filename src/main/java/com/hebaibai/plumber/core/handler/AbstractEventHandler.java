@@ -4,6 +4,7 @@ import com.hebaibai.plumber.core.Auth;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -17,6 +18,8 @@ import java.util.Set;
  */
 @Slf4j
 public abstract class AbstractEventHandler implements EventHandler {
+
+    protected JdbcTemplate jdbcTemplate;
 
     protected DataSource targetDataSource;
 
@@ -53,7 +56,7 @@ public abstract class AbstractEventHandler implements EventHandler {
         this.targetDataSource = dataSource;
         this.targetDatabase = database;
         this.targetTable = table;
-
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.targetTableMateData = initMateDate(dataSource, database, table);
     }
 
@@ -107,4 +110,34 @@ public abstract class AbstractEventHandler implements EventHandler {
         return tableMateDataUtils.getTableMateData();
     }
 
+    /**
+     * 返回一个执行sql 的线程
+     *
+     * @param sql
+     * @return
+     */
+    protected Runnable sqlRunnable(String sql) {
+        return new ExecutorSqlRunnable(jdbcTemplate, sql);
+    }
+
+    /**
+     * 执行sql的线程
+     */
+    private class ExecutorSqlRunnable implements Runnable {
+
+        private JdbcTemplate jdbcTemplate;
+
+        private String sql;
+
+        public ExecutorSqlRunnable(JdbcTemplate jdbcTemplate, String sql) {
+            this.jdbcTemplate = jdbcTemplate;
+            this.sql = sql;
+        }
+
+        @Override
+        public void run() {
+            log.info(sql);
+            jdbcTemplate.execute(sql);
+        }
+    }
 }

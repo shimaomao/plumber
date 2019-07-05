@@ -28,7 +28,7 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
     }
 
     @Override
-    public void handle(EventData data) {
+    public Runnable handle(EventData data) {
         log.info("new event insert ... ");
         String[] rows = EventDataUtils.getInsertRows(data);
         List<String> columns = sourceTableMateData.getColumns();
@@ -55,7 +55,7 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" ) VALUES ( ").append(String.join(", ", targetColumnValues));
         sqlBuilder.append(");");
         String sql = sqlBuilder.toString();
-        log.info(sql);
+        return sqlRunnable(sql);
     }
 
 

@@ -57,7 +57,7 @@ public interface EventHandler {
      *
      * @param data
      */
-    void handle(EventData data);
+    Runnable handle(EventData data);
 
     /**
      * 获取名称
