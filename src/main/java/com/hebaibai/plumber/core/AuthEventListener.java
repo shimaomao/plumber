@@ -8,6 +8,7 @@ import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
@@ -29,6 +30,10 @@ class AuthEventListener implements BinaryLogClient.EventListener {
     @Getter
     private Set<EventHandler> eventHandlers = new HashSet<>();
 
+    public AuthEventListener(Auth auth, @NonNull ExecutorService executorService) {
+        this.executorService = executorService;
+        this.auth = auth;
+    }
 
     /**
      * 实现监听事件
@@ -54,15 +59,10 @@ class AuthEventListener implements BinaryLogClient.EventListener {
                 continue;
             }
             Runnable runnable = handle.handle(data);
-            if (runnable == null) {
+            if (runnable != null) {
                 executorService.execute(runnable);
             }
         }
     }
 
-
-    public AuthEventListener(Auth auth, ExecutorService executorService) {
-        this.executorService = executorService;
-        this.auth = auth;
-    }
 }

@@ -4,6 +4,7 @@ import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ class AuthBinaryLogApp implements Runnable {
 
     private AuthEventListener authEventListener;
 
-    public AuthBinaryLogApp(Auth auth, ExecutorService executorService) {
+    public AuthBinaryLogApp(Auth auth, @NonNull ExecutorService executorService) {
         this.auth = auth;
         this.executorService = executorService;
 

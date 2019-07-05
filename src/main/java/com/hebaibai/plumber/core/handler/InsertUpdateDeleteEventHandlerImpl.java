@@ -105,8 +105,7 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
         }
         //删除事件
         else if (EventDataUtils.getDeleteRowsEventData(data) != null) {
-            this.eventHandlers.get(2).handle(data);
-            return this.eventHandlers.get(1).handle(data);
+            return this.eventHandlers.get(2).handle(data);
         }
         log.error("不支持的操作");
         return null;
