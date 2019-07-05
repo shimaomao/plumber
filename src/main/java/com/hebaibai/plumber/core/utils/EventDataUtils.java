@@ -105,12 +105,24 @@ public class EventDataUtils {
         return val;
     }
 
-    public static String[] getRows(EventData data) {
+    public static String[] getInsertRows(EventData data) {
         WriteRowsEventData writeRowsEventData = getWriteRowsEventData(data);
         if (writeRowsEventData == null) {
             return null;
         }
         List<Serializable[]> rows = writeRowsEventData.getRows();
+        if (rows.size() == 0) {
+            return null;
+        }
+        return values(rows.get(0));
+    }
+
+    public static String[] getDeleteRows(EventData data) {
+        DeleteRowsEventData deleteRowsEventData = getDeleteRowsEventData(data);
+        if (deleteRowsEventData == null) {
+            return null;
+        }
+        List<Serializable[]> rows = deleteRowsEventData.getRows();
         if (rows.size() == 0) {
             return null;
         }

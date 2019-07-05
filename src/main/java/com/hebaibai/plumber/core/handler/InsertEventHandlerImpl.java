@@ -2,14 +2,11 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
-import com.github.shyiko.mysql.binlog.event.WriteRowsEventData;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 插入事件处理器
@@ -32,7 +29,8 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
 
     @Override
     public void handle(EventData data) {
-        String[] rows = EventDataUtils.getRows(data);
+        log.info("new event insert ... ");
+        String[] rows = EventDataUtils.getInsertRows(data);
         List<String> columns = sourceTableMateData.getColumns();
         List<String> targetColumns = new ArrayList<>();
         List<String> targetColumnValues = new ArrayList<>();
@@ -42,11 +40,11 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
                 continue;
             }
             //目标字段
-            targetColumns.add(mapping.get(sourceName));
-            if (rows == null) {
+            String targetName = mapping.get(sourceName);
+            targetColumns.add("`" + targetName + "`");
+            if (rows[i] == null) {
                 targetColumnValues.add("null");
             } else {
-                //TODO: 需要添加数据转换
                 targetColumnValues.add("'" + rows[i] + "'");
             }
         }

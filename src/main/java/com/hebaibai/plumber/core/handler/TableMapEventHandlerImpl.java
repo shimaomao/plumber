@@ -18,9 +18,6 @@ import java.sql.SQLException;
 @Slf4j
 public class TableMapEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
-    public TableMapEventHandlerImpl() {
-    }
-
     @Override
     public void setSource(Auth auth, String database, String table) throws SQLException {
         this.auth = auth;
