@@ -2,14 +2,20 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.hebaibai.plumber.core.Auth;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 更新事件处理器
+ * @author hjx
+ */
 @Slf4j
 public class UpdateEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
@@ -24,7 +30,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         if (!EventType.isUpdate(eventType)) {
             return false;
         }
-        return database.equals(dataBaseName) && table.equals(tableName);
+        return sourceDatabase.equals(dataBaseName) && sourceTable.equals(tableName);
     }
 
     @Override
@@ -33,35 +39,43 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         String[] befor = EventDataUtils.getBeforUpdate(data);
         String[] after = EventDataUtils.getAfterUpdate(data);
         //拼装sql需要的数据
-        List<String> targetColumns = new ArrayList<>();
-        List<String> targetColumnValues = new ArrayList<>();
-        List<String> columns = tableMateData.getColumns();
-
-        Map<String, String> keyColumnMap = targetTable.getKeyColumnMap();
+        List<String> columns = sourceTableMateData.getColumns();
+        List<String> updateColumns = new ArrayList<>();
+        List<String> updateKeyColumns = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             String fromName = columns.get(i);
             //是否是key
-            boolean isKey = keyColumnMap.containsKey(fromName);
+            boolean isKey = keys.contains(fromName);
             //不是key或者数据没有变化的，跳过
             if (!isKey && Objects.equals(befor[i], after[i])) {
                 continue;
             }
-            String targetName = targetTable.getColumnMap().get(fromName);
-            targetColumns.add("`" + targetName + "`");
+            String targetName = mapping.get(fromName);
+            //如果是key，以key为条件执行更新
+            if (isKey) {
+                //TODO: 需要添加数据转换
+                updateKeyColumns.add("`" + targetName + "` = '" + befor[i] + "'");
+            }
             if (after[i] == null) {
-                after[i] = "null";
+                updateColumns.add("`" + targetName + "` = null");
             } else {
-                targetColumnValues.add("'" + after[i] + "'");
+                //TODO: 需要添加数据转换
+                updateColumns.add("`" + targetName + "` = '" + after[i] + "'");
             }
         }
+
+        if (updateColumns.size() == 0) {
+            return;
+        }
+
         //拼装sql
-        StringBuilder sql = new StringBuilder();
-        sql.append("REPLACE INTO ");
-        sql.append(targetTable.getDatabase()).append(".").append(targetTable.getTable());
-        sql.append(" ( ").append(String.join(", ", targetColumns));
-        sql.append(" ) VALUES ( ").append(String.join(", ", targetColumnValues));
-        sql.append(");");
-        System.out.println(sql.toString());
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("UPDATE ").append(targetDatabase).append(".").append(targetTable).append(" SET ");
+        sqlBuilder.append(String.join(", ", updateColumns));
+        sqlBuilder.append(" WHERE ");
+        sqlBuilder.append(String.join("AND ", updateKeyColumns));
+        String sql = sqlBuilder.toString();
+        log.info(sql);
     }
 
     @Override

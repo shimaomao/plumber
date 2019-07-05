@@ -18,7 +18,7 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
         if (!EventType.isUpdate(eventType)) {
             return false;
         }
-        return database.equals(dataBaseName) && table.equals(tableName);
+        return sourceDatabase.equals(dataBaseName) && sourceTable.equals(tableName);
     }
 
     @Override

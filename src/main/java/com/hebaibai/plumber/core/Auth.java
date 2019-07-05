@@ -53,13 +53,13 @@ public class Auth {
     private class DataBaseMateData {
 
         /**
-         * key database.table
+         * key sourceDatabase.sourceTable
          * value tableId
          */
         Map<Long, String> tableNameTableIdMap = new HashMap<>();
 
         /**
-         * key database.table
+         * key sourceDatabase.sourceTable
          */
         Map<Long, String> tableIdDatabaseName = new HashMap<>();
 

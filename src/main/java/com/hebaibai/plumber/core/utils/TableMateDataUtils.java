@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,29 +21,29 @@ import java.util.Map;
 @Getter
 public class TableMateDataUtils {
 
-    private String hostname;
-
-    private int port;
-
-    private String username;
-
-    private String password;
+    private Connection connection;
 
     private String database;
 
     private String table;
 
-    public TableMateDataUtils(String hostname, int port, String username, String password, String database, String table) {
-        this.hostname = hostname;
-        this.port = port;
-        this.username = username;
-        this.password = password;
+    public TableMateDataUtils(String hostname, int port, String username, String password, String database, String table) throws SQLException {
         this.database = database;
         this.table = table;
+        String jdbcUrl = "jdbc:mysql://" + hostname + ":" + port + "?characterEncoding=utf-8";
+        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+        this.connection = connection;
+    }
+
+    public TableMateDataUtils(DataSource dataSource, String database, String table) throws SQLException {
+        this.database = database;
+        this.table = table;
+        Connection connection = dataSource.getConnection();
+        this.connection = connection;
     }
 
     public TableMateData getTableMateData() throws SQLException {
-        String createSql = getCreateSql();
+        String createSql = getCreateSql(connection);
         TableMateData mateData = new TableMateData();
         mateData.setNama(table);
         //字段信息
@@ -61,22 +62,17 @@ public class TableMateDataUtils {
             String columnType = SqlUtils.getByPattern(columnSql, "`" + columnName + "` ([A-Za-z]*)", 1);
             columnTypeMap.put(columnName, columnType);
         }
-
         return mateData;
     }
 
-
-    private String getCreateSql() throws SQLException {
-        String jdbcUrl = "jdbc:mysql://" + hostname + ":" + port + "/" + database + "?characterEncoding=utf-8";
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
-             Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery("show CREATE TABLE " + table)) {
-            while (resultSet.next()) {
-                return resultSet.getString(2);
-            }
+    private String getCreateSql(Connection connection) throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("show create table " + database + "." + table);
+        while (resultSet.next()) {
+            return resultSet.getString(2);
         }
+        connection.close();
         return null;
     }
-
-
 }
+

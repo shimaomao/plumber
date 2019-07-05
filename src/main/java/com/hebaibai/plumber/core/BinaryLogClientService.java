@@ -73,7 +73,6 @@ public class BinaryLogClientService {
     public void registEventHandler(Auth auth, EventHandler handle) {
         hasAuth(auth);
         AuthBinaryLogApp authBinaryLogApp = binaryLogAppMap.get(auth);
-        handle.setAuth(auth);
         authBinaryLogApp.registEventHandler(handle);
     }
 

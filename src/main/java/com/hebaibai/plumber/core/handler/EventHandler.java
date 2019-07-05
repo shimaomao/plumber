@@ -3,14 +3,34 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.core.Auth;
-import com.hebaibai.plumber.core.TargetTable;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author hjx
  */
 public interface EventHandler {
 
-    void setAuth(Auth auth);
+
+    /**
+     * 设置目标数据源
+     *
+     * @param dataSource
+     */
+    void setTarget(DataSource dataSource, String database, String table) throws SQLException;
+
+    /**
+     * 设置来源数据
+     *
+     * @param auth
+     * @param database
+     * @param table
+     */
+    void setSource(Auth auth, String database, String table) throws SQLException;
+
 
     /**
      * 是否支持当前操作
@@ -33,7 +53,7 @@ public interface EventHandler {
     void setStatus(boolean isRun);
 
     /**
-     * 处理类
+     * 处理
      *
      * @param data
      */
@@ -47,9 +67,18 @@ public interface EventHandler {
     String getName();
 
     /**
-     * 设置目标数据表
+     * 字段映射
+     * key      source 字段
+     * value    target 字段
      *
-     * @param targetTable
+     * @param mapping
      */
-    void setTargetTable(TargetTable targetTable);
+    void setMapping(Map<String, String> mapping);
+
+    /**
+     * 来源表中的key
+     *
+     * @param keys
+     */
+    void setKeys(Set<String> keys);
 }

@@ -1,24 +1,27 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.hebaibai.plumber.core.Auth;
-import com.hebaibai.plumber.core.TargetTable;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.*;
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 
-@Getter
-@Setter
 @Slf4j
 public abstract class AbstractEventHandler implements EventHandler {
 
-    protected String database;
+    protected DataSource targetDataSource;
 
-    protected String table;
+    protected String targetDatabase;
+
+    protected String targetTable;
+
+    protected String sourceDatabase;
+
+    protected String sourceTable;
 
     protected String name;
 
@@ -26,13 +29,28 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected Auth auth;
 
-    protected TargetTable targetTable;
+    protected TableMateData sourceTableMateData;
 
-    protected TableMateData tableMateData;
+    protected TableMateData targetTableMateData;
+
+    protected Map<String, String> mapping;
+
+    protected Set<String> keys;
 
     @Override
-    public void setAuth(Auth auth) {
+    public void setSource(Auth auth, String database, String table) throws SQLException {
+        this.sourceDatabase = database;
+        this.sourceTable = table;
         this.auth = auth;
+        this.sourceTableMateData = initMateDate(auth.getHostname(), database, table, auth.getPort(), auth.getUsername(), auth.getPassword());
+    }
+
+    @Override
+    public void setTarget(DataSource dataSource, String database, String table) throws SQLException {
+        this.targetDataSource = dataSource;
+        this.targetDatabase = database;
+        this.targetTable = table;
+        this.targetTableMateData = initMateDate(dataSource, database, table);
     }
 
     @Override
@@ -41,28 +59,48 @@ public abstract class AbstractEventHandler implements EventHandler {
     }
 
     @Override
-    public void setTargetTable(TargetTable targetTable) {
-        this.targetTable = targetTable;
+    public void setMapping(Map<String, String> mapping) {
+        this.mapping = mapping;
+    }
+
+    @Override
+    public void setKeys(Set<String> keys) {
+        this.keys = keys;
     }
 
     /**
      * 获取数据库的元数据
      *
-     * @param renew 是否更新
+     * @param host
+     * @param database
+     * @param port
+     * @param user
+     * @param pwd
+     * @return
      * @throws SQLException
      */
-    public void initMateDate(boolean renew) throws SQLException {
-        log.info("加载表: {}.{} 元数据. 是否更新: {}", database, table, renew);
-        if (auth == null) {
-            throw new UnsupportedOperationException("不支持的操作");
-        }
-        if (renew || tableMateData == null) {
-            TableMateDataUtils tableMateDataUtils = new TableMateDataUtils(
-                    auth.getHostname(), auth.getPort(), auth.getUsername(),
-                    auth.getPassword(), database, table
-            );
-            tableMateData = tableMateDataUtils.getTableMateData();
-        }
+    private TableMateData initMateDate(String host, String database, String table, int port, String user, String pwd) throws SQLException {
+        log.info("Load TableMateData: {}.{}", database, table);
+        TableMateDataUtils tableMateDataUtils = new TableMateDataUtils(
+                host, port, user,
+                pwd, database, table
+        );
+        return tableMateDataUtils.getTableMateData();
+    }
+
+    /**
+     * 获取数据库的元数据
+     *
+     * @param dataSource
+     * @param database
+     * @param table
+     * @return
+     * @throws SQLException
+     */
+    private TableMateData initMateDate(DataSource dataSource, String database, String table) throws SQLException {
+        log.info("Load TableMateData: {}.{}", database, table);
+        TableMateDataUtils tableMateDataUtils = new TableMateDataUtils(dataSource, database, table);
+        return tableMateDataUtils.getTableMateData();
     }
 
 }
