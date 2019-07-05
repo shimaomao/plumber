@@ -61,6 +61,6 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
 
     @Override
     public String getName() {
-        return name;
+        return "insert event hander";
     }
 }

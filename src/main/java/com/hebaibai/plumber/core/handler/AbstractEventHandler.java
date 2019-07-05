@@ -28,8 +28,6 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected String sourceTable;
 
-    protected String name;
-
     protected boolean status = true;
 
     protected Auth auth;
@@ -55,6 +53,7 @@ public abstract class AbstractEventHandler implements EventHandler {
         this.targetDataSource = dataSource;
         this.targetDatabase = database;
         this.targetTable = table;
+
         this.targetTableMateData = initMateDate(dataSource, database, table);
     }
 

@@ -44,7 +44,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         for (int i = 0; i < columns.size(); i++) {
             String sourceName = columns.get(i);
             //是否是key
-            boolean isKey = keys.contains(sourceName) || mapping.containsKey(sourceName);
+            boolean isKey = keys.contains(sourceName) && mapping.containsKey(sourceName);
             //不是key或者数据没有变化的，跳过
             if (!isKey && Objects.equals(befor[i], after[i])) {
                 continue;
@@ -77,6 +77,6 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
 
     @Override
     public String getName() {
-        return name;
+        return "update event hander";
     }
 }

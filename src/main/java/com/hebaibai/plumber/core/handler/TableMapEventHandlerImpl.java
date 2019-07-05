@@ -45,6 +45,6 @@ public class TableMapEventHandlerImpl extends AbstractEventHandler implements Ev
 
     @Override
     public String getName() {
-        return name;
+        return "table map event hander";
     }
 }

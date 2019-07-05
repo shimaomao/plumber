@@ -35,7 +35,8 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
         List<String> wheres = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             String sourceName = columns.get(i);
-            if (!keys.contains(sourceName) || !mapping.containsKey(sourceName)) {
+            boolean isKey = keys.contains(sourceName) && mapping.containsKey(sourceName);
+            if (!isKey) {
                 continue;
             }
             String targetName = mapping.get(sourceName);
@@ -57,6 +58,6 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
 
     @Override
     public String getName() {
-        return name;
+        return "delete event hander";
     }
 }
