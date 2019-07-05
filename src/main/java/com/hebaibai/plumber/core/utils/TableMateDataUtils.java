@@ -66,12 +66,15 @@ public class TableMateDataUtils {
     }
 
     private String getCreateSql(Connection connection) throws SQLException {
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery("show create table " + database + "." + table);
-        while (resultSet.next()) {
-            return resultSet.getString(2);
+
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("show create table " + database + "." + table)) {
+            while (resultSet.next()) {
+                return resultSet.getString(2);
+            }
+        } finally {
+            connection.close();
         }
-        connection.close();
         return null;
     }
 }

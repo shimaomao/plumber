@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * 从 BigDecimal 转换为 String
+ * @author hjx
  */
 public class BigDecimalToStringConversion implements Conversion<String> {
 

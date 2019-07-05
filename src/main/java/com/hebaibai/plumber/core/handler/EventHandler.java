@@ -19,6 +19,9 @@ public interface EventHandler {
      * 设置目标数据源
      *
      * @param dataSource
+     * @param database
+     * @param table
+     * @throws SQLException
      */
     void setTarget(DataSource dataSource, String database, String table) throws SQLException;
 
@@ -28,6 +31,7 @@ public interface EventHandler {
      * @param auth
      * @param database
      * @param table
+     * @throws SQLException
      */
     void setSource(Auth auth, String database, String table) throws SQLException;
 
@@ -56,6 +60,7 @@ public interface EventHandler {
      * 处理
      *
      * @param data
+     * @return
      */
     Runnable handle(EventData data);
 

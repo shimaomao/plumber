@@ -2,6 +2,8 @@ package com.hebaibai.plumber.core.conversion;
 
 /**
  * 从 byte[] 转换为 String
+ *
+ * @author hjx
  */
 public class BytesToStringConversion implements Conversion<String> {
 

@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * 用于数据库的链接
+ * @author hjx
  */
 @Data
 public class Auth {

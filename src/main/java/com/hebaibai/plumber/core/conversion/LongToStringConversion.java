@@ -2,6 +2,8 @@ package com.hebaibai.plumber.core.conversion;
 
 /**
  * 从 long 转换为 String
+ *
+ * @author hjx
  */
 public class LongToStringConversion implements Conversion<String> {
 
