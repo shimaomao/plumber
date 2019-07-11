@@ -31,9 +31,13 @@ public class DataBaseVerticle extends AbstractVerticle {
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_INSERT, this::insert);
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_DELETE, this::delete);
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_UPDATE, this::update);
-        log.info("init DataBaseVerticle success");
+        log.info("start DataBaseVerticle success");
     }
 
+    @Override
+    public void stop() throws Exception {
+        log.info("stop DataBaseVerticle success");
+    }
 
     /**
      * 执行查询

@@ -69,12 +69,19 @@ public class BinLogVerticle extends AbstractVerticle {
         //设置binlog_client线程名称
         binlogThread.setName("binlog_client:" + dataSourceConfig.getHostname());
         binlogThread.start();
-        log.info("init BinLogVerticle success");
+        log.info("start BinLogVerticle success");
     }
 
     @Override
     public void stop() throws Exception {
         binlogThread.run = false;
+        try {
+            binlogThread.binaryLogClient.disconnect();
+        } catch (IOException e) {
+            log.info("disconnect binaryLogClient error", e);
+        }
+        log.info("disconnect binaryLogClient success");
+        log.info("stop BinLogVerticle success");
     }
 
     private class BinlogThread extends Thread {
@@ -83,7 +90,7 @@ public class BinLogVerticle extends AbstractVerticle {
 
         private BinaryLogClient binaryLogClient;
 
-        private boolean run = false;
+        transient private boolean run = false;
 
         @Override
         public void run() {
@@ -94,7 +101,7 @@ public class BinLogVerticle extends AbstractVerticle {
                     log.info("binaryLogClient connect error", e);
                 }
             }
-            log.info("binaryLogClient connect stop");
+            log.info("stop Thread: {} success", Thread.currentThread().getName());
         }
 
         @Override
