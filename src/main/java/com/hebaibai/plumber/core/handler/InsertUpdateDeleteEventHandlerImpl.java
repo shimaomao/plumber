@@ -2,12 +2,11 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
-import com.hebaibai.plumber.core.Auth;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
+import com.hebaibai.plumber.core.utils.TableMateData;
+import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -39,25 +38,18 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
     }
 
     @Override
-    public void setSource(Auth auth, String database, String table) throws SQLException {
-        super.setSource(auth, database, table);
+    public void setSource(TableMateData tableMateData) {
+        super.setSource(tableMateData);
         for (AbstractEventHandler eventHandler : eventHandlers) {
-            eventHandler.sourceDatabase = database;
-            eventHandler.sourceTable = table;
-            eventHandler.auth = auth;
-            eventHandler.sourceTableMateData = this.sourceTableMateData;
+            eventHandler.setSource(tableMateData);
         }
     }
 
     @Override
-    public void setTarget(DataSource dataSource, String database, String table) throws SQLException {
-        super.setTarget(dataSource, database, table);
+    public void setTarget(TableMateData tableMateData) {
+        super.setTarget(tableMateData);
         for (AbstractEventHandler eventHandler : eventHandlers) {
-            eventHandler.targetDataSource = dataSource;
-            eventHandler.targetDatabase = database;
-            eventHandler.targetTable = table;
-            eventHandler.targetTableMateData = this.targetTableMateData;
-            eventHandler.jdbcTemplate = this.jdbcTemplate;
+            eventHandler.setTarget(tableMateData);
         }
     }
 
@@ -94,20 +86,19 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
     }
 
     @Override
-    public Runnable handle(EventData data) {
+    public void handle(EventBus eventBus, EventData data) {
         //插入事件
         if (EventDataUtils.getWriteRowsEventData(data) != null) {
-            return this.eventHandlers.get(0).handle(data);
+            this.eventHandlers.get(0).handle(eventBus, data);
         }
         //更新事件
         else if (EventDataUtils.getUpdateRowsEventData(data) != null) {
-            return this.eventHandlers.get(1).handle(data);
+            this.eventHandlers.get(1).handle(eventBus, data);
         }
         //删除事件
         else if (EventDataUtils.getDeleteRowsEventData(data) != null) {
-            return this.eventHandlers.get(2).handle(data);
+            this.eventHandlers.get(2).handle(eventBus, data);
         }
         log.error("不支持的操作");
-        return null;
     }
 }

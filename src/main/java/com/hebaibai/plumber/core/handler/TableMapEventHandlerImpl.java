@@ -3,11 +3,9 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.github.shyiko.mysql.binlog.event.TableMapEventData;
-import com.hebaibai.plumber.core.Auth;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
+import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
-
-import java.sql.SQLException;
 
 /**
  * 监控表的名称
@@ -17,11 +15,6 @@ import java.sql.SQLException;
  */
 @Slf4j
 public class TableMapEventHandlerImpl extends AbstractEventHandler implements EventHandler {
-
-    @Override
-    public void setSource(Auth auth, String database, String table) throws SQLException {
-        this.auth = auth;
-    }
 
 
     @Override
@@ -33,14 +26,13 @@ public class TableMapEventHandlerImpl extends AbstractEventHandler implements Ev
     }
 
     @Override
-    public Runnable handle(EventData data) {
+    public void handle(EventBus eventBus, EventData data) {
         TableMapEventData tableMapEventData = EventDataUtils.getTableMapEventData(data);
         long tableId = tableMapEventData.getTableId();
         String tableName = tableMapEventData.getTable();
         String databaseName = tableMapEventData.getDatabase();
-        auth.seveTableName(tableId, tableName);
-        auth.seveDatabaseName(tableId, databaseName);
-        return null;
+        dataSourceConfig.seveTableName(tableId, tableName);
+        dataSourceConfig.seveDatabaseName(tableId, databaseName);
     }
 
 

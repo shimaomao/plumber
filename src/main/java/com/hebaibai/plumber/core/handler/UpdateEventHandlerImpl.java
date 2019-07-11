@@ -2,14 +2,13 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
-import com.hebaibai.plumber.core.Auth;
+import com.hebaibai.plumber.ConsumerAddress;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
+import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,7 +31,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
     }
 
     @Override
-    public Runnable handle(EventData data) {
+    public void handle(EventBus eventBus, EventData data) {
 
         log.info("new event update ... ");
         String[] befor = EventDataUtils.getBeforUpdate(data);
@@ -62,7 +61,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         }
 
         if (updateColumns.size() == 0) {
-            return null;
+            return;
         }
 
         //拼装sql
@@ -72,7 +71,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" WHERE ");
         sqlBuilder.append(String.join("AND ", updateKeyColumns));
         String sql = sqlBuilder.toString();
-        return sqlRunnable(sql);
+        eventBus.publish(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
     }
 
     @Override

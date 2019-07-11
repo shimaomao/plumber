@@ -11,7 +11,7 @@
 ```java
 
 import com.hebaibai.plumber.PlumberApplicationTests;
-import com.hebaibai.plumber.core.Auth;
+import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.BinaryLogClientService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.junit.Test;
@@ -40,21 +40,21 @@ public class InsertUpdateDeleteEventHandlerImplTest extends PlumberApplicationTe
         DataSource dataSource = comboPooledDataSource;
 
         //binlog来源数据库配置
-        Auth auth = new Auth();
-        auth.setHostname("127.0.0.1");
-        auth.setUsername("root");
-        auth.setPassword("root");
+        Auth dataSourceConfig = new Auth();
+        dataSourceConfig.setHostname("127.0.0.1");
+        dataSourceConfig.setUsername("root");
+        dataSourceConfig.setPassword("root");
 
         //创建链接
-        binaryLogClientService.create(auth);
+        binaryLogClientService.create(dataSourceConfig);
 
         //注册binlog table map 事件 处理器
         EventHandler tableMapEventHandler = new TableMapEventHandlerImpl();
-        tableMapEventHandler.setSource(auth, null, null);
+        tableMapEventHandler.setSource(dataSourceConfig, null, null);
 
         //注册 增删改 事件处理器
         EventHandler eventHandler = new InsertUpdateDeleteEventHandlerImpl();
-        eventHandler.setSource(auth, "testdb", "table_1");
+        eventHandler.setSource(dataSourceConfig, "testdb", "table_1");
         eventHandler.setTarget(dataSource, "testdb", "table_2");
         eventHandler.setStatus(true);
 
@@ -71,11 +71,11 @@ public class InsertUpdateDeleteEventHandlerImplTest extends PlumberApplicationTe
             put("update_user_no", "update_user_no_2");
             put("update_time", "update_time_2");
         }});
-        binaryLogClientService.registEventHandler(auth, tableMapEventHandler);
-        binaryLogClientService.registEventHandler(auth, eventHandler);
+        binaryLogClientService.registEventHandler(dataSourceConfig, tableMapEventHandler);
+        binaryLogClientService.registEventHandler(dataSourceConfig, eventHandler);
 
         //启动链接
-        binaryLogClientService.start(auth);
+        binaryLogClientService.start(dataSourceConfig);
 
         //维持测试代码运行
         while (true) {

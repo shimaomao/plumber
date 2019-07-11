@@ -2,10 +2,10 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
-import com.hebaibai.plumber.core.Auth;
+import com.hebaibai.plumber.DataSourceConfig;
+import com.hebaibai.plumber.core.utils.TableMateData;
+import io.vertx.core.eventbus.EventBus;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,22 +18,16 @@ public interface EventHandler {
     /**
      * 设置目标数据源
      *
-     * @param dataSource
-     * @param database
-     * @param table
-     * @throws SQLException
+     * @param tableMateData
      */
-    void setTarget(DataSource dataSource, String database, String table) throws SQLException;
+    void setTarget(TableMateData tableMateData);
 
     /**
      * 设置来源数据
      *
-     * @param auth
-     * @param database
-     * @param table
-     * @throws SQLException
+     * @param tableMateData
      */
-    void setSource(Auth auth, String database, String table) throws SQLException;
+    void setSource(TableMateData tableMateData);
 
 
     /**
@@ -48,6 +42,13 @@ public interface EventHandler {
 
 
     /**
+     * 设置来源
+     *
+     * @param dataSourceConfig
+     */
+    void setDataSourceConfig(DataSourceConfig dataSourceConfig);
+
+    /**
      * 设置状态
      *
      * @param isRun true:可用
@@ -59,10 +60,11 @@ public interface EventHandler {
     /**
      * 处理
      *
+     * @param eventBus
      * @param data
      * @return
      */
-    Runnable handle(EventData data);
+    void handle(EventBus eventBus, EventData data);
 
     /**
      * 获取名称

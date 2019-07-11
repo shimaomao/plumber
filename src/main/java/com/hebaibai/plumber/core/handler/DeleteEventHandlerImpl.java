@@ -2,7 +2,9 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.hebaibai.plumber.ConsumerAddress;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
+import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
     }
 
     @Override
-    public Runnable handle(EventData data) {
+    public void handle(EventBus eventBus, EventData data) {
         log.info("new event delete ... ");
         String[] rows = EventDataUtils.getDeleteRows(data);
         List<String> columns = sourceTableMateData.getColumns();
@@ -52,7 +54,7 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" WHERE ");
         sqlBuilder.append(String.join("and ", wheres));
         String sql = sqlBuilder.toString();
-        return sqlRunnable(sql);
+        eventBus.publish(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
     }
 
     @Override

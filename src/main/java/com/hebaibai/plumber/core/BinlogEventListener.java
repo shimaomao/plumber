@@ -5,15 +5,13 @@ import com.github.shyiko.mysql.binlog.event.Event;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
-import lombok.Getter;
-import lombok.NonNull;
+import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 /**
  * 监听数据库的binlog事件
@@ -21,18 +19,26 @@ import java.util.concurrent.ExecutorService;
  * @author hjx
  */
 @Slf4j
-class AuthEventListener implements BinaryLogClient.EventListener {
+public class BinlogEventListener implements BinaryLogClient.EventListener {
 
-    private ExecutorService executorService;
+    private DataSourceConfig dataSourceConfig;
 
-    private Auth auth;
+    private EventBus eventBus;
 
-    @Getter
-    private Set<EventHandler> eventHandlers = new HashSet<>();
+    private Set<EventHandler> eventHandlers;
 
-    public AuthEventListener(Auth auth, @NonNull ExecutorService executorService) {
-        this.executorService = executorService;
-        this.auth = auth;
+    public BinlogEventListener(DataSourceConfig dataSourceConfig, EventBus eventBus) {
+        this.dataSourceConfig = dataSourceConfig;
+        this.eventBus = eventBus;
+    }
+
+    /**
+     * 添加EventData处理器
+     *
+     * @param eventHandlers
+     */
+    public void setEventHandlers(Set<EventHandler> eventHandlers) {
+        this.eventHandlers = eventHandlers;
     }
 
     /**
@@ -51,17 +57,14 @@ class AuthEventListener implements BinaryLogClient.EventListener {
         }
         log.debug("binlog event: {}", event);
         Long tableId = EventDataUtils.getTableId(data);
-        String tableName = auth.getTableName(tableId);
-        String databaseName = auth.getDatabaseName(tableId);
+        String tableName = dataSourceConfig.getTableName(tableId);
+        String databaseName = dataSourceConfig.getDatabaseName(tableId);
         for (EventHandler handle : eventHandlers) {
             boolean support = handle.support(eventType, databaseName, tableName);
             if (!support) {
                 continue;
             }
-            Runnable runnable = handle.handle(data);
-            if (runnable != null) {
-                executorService.execute(runnable);
-            }
+            handle.handle(eventBus, data);
         }
     }
 

@@ -15,6 +15,8 @@ public class TableMateData {
 
     private String nama;
 
+    private String dataBase;
+
     private List<String> columns;
 
     private Map<String, String> columnType;

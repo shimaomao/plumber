@@ -1,13 +1,10 @@
 package com.hebaibai.plumber.core.handler;
 
-import com.hebaibai.plumber.core.Auth;
+import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.utils.TableMateData;
-import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,8 +15,6 @@ import java.util.Set;
  */
 @Slf4j
 public abstract class AbstractEventHandler implements EventHandler {
-
-    protected JdbcTemplate jdbcTemplate;
 
     protected DataSource targetDataSource;
 
@@ -33,7 +28,7 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected boolean status = true;
 
-    protected Auth auth;
+    protected DataSourceConfig dataSourceConfig;
 
     protected TableMateData sourceTableMateData;
 
@@ -44,20 +39,22 @@ public abstract class AbstractEventHandler implements EventHandler {
     protected Set<String> keys;
 
     @Override
-    public void setSource(Auth auth, String database, String table) throws SQLException {
-        this.sourceDatabase = database;
-        this.sourceTable = table;
-        this.auth = auth;
-        this.sourceTableMateData = initMateDate(auth.getHostname(), database, table, auth.getPort(), auth.getUsername(), auth.getPassword());
+    public void setSource(TableMateData sourceTableMateData) {
+        this.sourceDatabase = sourceTableMateData.getDataBase();
+        this.sourceTable = sourceTableMateData.getNama();
+        this.sourceTableMateData = sourceTableMateData;
     }
 
     @Override
-    public void setTarget(DataSource dataSource, String database, String table) throws SQLException {
-        this.targetDataSource = dataSource;
-        this.targetDatabase = database;
-        this.targetTable = table;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.targetTableMateData = initMateDate(dataSource, database, table);
+    public void setTarget(TableMateData targetTableMateData) {
+        this.targetDatabase = targetTableMateData.getDataBase();
+        this.targetTable = targetTableMateData.getNama();
+        this.targetTableMateData = targetTableMateData;
+    }
+
+    @Override
+    public void setDataSourceConfig(DataSourceConfig dataSourceConfig) {
+        this.dataSourceConfig = dataSourceConfig;
     }
 
     @Override
@@ -75,69 +72,4 @@ public abstract class AbstractEventHandler implements EventHandler {
         this.keys = keys;
     }
 
-    /**
-     * 获取数据库的元数据
-     *
-     * @param host
-     * @param database
-     * @param port
-     * @param user
-     * @param pwd
-     * @return
-     * @throws SQLException
-     */
-    private TableMateData initMateDate(String host, String database, String table, int port, String user, String pwd) throws SQLException {
-        log.info("Load TableMateData: {}.{}", database, table);
-        TableMateDataUtils tableMateDataUtils = new TableMateDataUtils(
-                host, port, user,
-                pwd, database, table
-        );
-        return tableMateDataUtils.getTableMateData();
-    }
-
-    /**
-     * 获取数据库的元数据
-     *
-     * @param dataSource
-     * @param database
-     * @param table
-     * @return
-     * @throws SQLException
-     */
-    private TableMateData initMateDate(DataSource dataSource, String database, String table) throws SQLException {
-        log.info("Load TableMateData: {}.{}", database, table);
-        TableMateDataUtils tableMateDataUtils = new TableMateDataUtils(dataSource, database, table);
-        return tableMateDataUtils.getTableMateData();
-    }
-
-    /**
-     * 返回一个执行sql 的线程
-     *
-     * @param sql
-     * @return
-     */
-    protected Runnable sqlRunnable(String sql) {
-        return new ExecutorSqlRunnable(jdbcTemplate, sql);
-    }
-
-    /**
-     * 执行sql的线程
-     */
-    private class ExecutorSqlRunnable implements Runnable {
-
-        private JdbcTemplate jdbcTemplate;
-
-        private String sql;
-
-        public ExecutorSqlRunnable(JdbcTemplate jdbcTemplate, String sql) {
-            this.jdbcTemplate = jdbcTemplate;
-            this.sql = sql;
-        }
-
-        @Override
-        public void run() {
-            log.info(sql);
-            jdbcTemplate.execute(sql);
-        }
-    }
 }
