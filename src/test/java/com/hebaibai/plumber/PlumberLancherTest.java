@@ -1,14 +1,4 @@
-# plumber
-
-数据实时同步工具，使用 vert.x 异步框架，效率高
-
-### 原理
-
-将自己伪装成 mysql slave，获取mysql推送的binlog信息，通过字段映射，处理成为新的sql并向目标库执从而完成数据实时同步。
-
-### 代码示例
-
-```java
+package com.hebaibai.plumber;
 
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
@@ -28,19 +18,19 @@ public class PlumberLancherTest {
 
         //数据来源
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
-        dataSourceConfig.setHostname("127.0.0.1");
+        dataSourceConfig.setHostname("172.31.100.51");
         dataSourceConfig.setPort(3306);
-        dataSourceConfig.setUsername("root");
-        dataSourceConfig.setPassword("root");
+        dataSourceConfig.setUsername("pubmidb");
+        dataSourceConfig.setPassword("Pubmi@2016");
         config.setDataSourceConfig(dataSourceConfig);
 
         //数据目标
         DataTargetConfig dataTargetConfig = new DataTargetConfig();
         dataTargetConfig.setCharset("utf-8");
-        dataTargetConfig.setHost("127.0.0.1");
+        dataTargetConfig.setHost("172.31.100.51");
         dataTargetConfig.setPort(3306);
-        dataTargetConfig.setUsername("root");
-        dataTargetConfig.setPassword("root");
+        dataTargetConfig.setUsername("pubmidb");
+        dataTargetConfig.setPassword("Pubmi@2016");
         config.setDataTargetConfig(dataTargetConfig);
 
         //增删改处理器
@@ -102,10 +92,14 @@ public class PlumberLancherTest {
         plumberLancher.setContext(context);
         //启动
         plumberLancher.start();
-        TimeUnit.SECONDS.sleep(10);
+        for (String verticleId : plumberLancher.verticleIds()) {
+            System.out.println(verticleId);
+        }
+        TimeUnit.SECONDS.sleep(5);
         //停止
-        plumberLancher.start();
+        plumberLancher.stop();
+        for (String verticleId : plumberLancher.verticleIds()) {
+            System.out.println(verticleId);
+        }
     }
 }
-
-```

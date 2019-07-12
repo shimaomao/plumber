@@ -11,9 +11,9 @@ public class DataTargetConfig {
     private String username;
     private String password;
     private String charset;
-    private int maxPoolSize;
-    private long queryTimeout;
-    private long connectTimeout;
+    private Integer maxPoolSize = 10;
+    private Integer queryTimeout = 5000;
+    private Integer connectTimeout = 10000;
 
     public JsonObject getJson() {
         return new JsonObject()

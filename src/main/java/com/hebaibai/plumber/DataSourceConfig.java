@@ -1,11 +1,8 @@
 package com.hebaibai.plumber;
 
-import com.hebaibai.plumber.core.TableIdMapping;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
