@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 更新事件处理器
@@ -71,7 +72,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" WHERE ");
         sqlBuilder.append(String.join("AND ", updateKeyColumns));
         String sql = sqlBuilder.toString();
-        eventBus.publish(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
+        eventBus.send(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
     }
 
     @Override

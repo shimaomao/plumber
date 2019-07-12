@@ -42,13 +42,6 @@ public interface EventHandler {
 
 
     /**
-     * 设置来源
-     *
-     * @param dataSourceConfig
-     */
-    void setDataSourceConfig(DataSourceConfig dataSourceConfig);
-
-    /**
      * 设置状态
      *
      * @param isRun true:可用

@@ -45,7 +45,10 @@ public class DataBaseVerticle extends AbstractVerticle {
      * @param message
      */
     public void query(Message<String> message) {
-        sqlClient.query(message.body(), res -> {
+        String sql = message.body();
+        log.debug(sql);
+        System.out.println(sql);
+        sqlClient.query(sql, res -> {
             if (res.succeeded()) {
                 message.reply(res.result().getRows());
             } else {
@@ -61,7 +64,10 @@ public class DataBaseVerticle extends AbstractVerticle {
      * @param message
      */
     public void update(Message<String> message) {
-        sqlClient.update(message.body(), res -> {
+        String sql = message.body();
+        log.debug(sql);
+        System.out.println(sql);
+        sqlClient.update(sql, res -> {
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {
@@ -77,7 +83,10 @@ public class DataBaseVerticle extends AbstractVerticle {
      * @param message
      */
     public void delete(Message<String> message) {
-        sqlClient.update(message.body(), res -> {
+        String sql = message.body();
+        log.debug(sql);
+        System.out.println(sql);
+        sqlClient.update(sql, res -> {
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {
@@ -93,7 +102,10 @@ public class DataBaseVerticle extends AbstractVerticle {
      * @param message
      */
     public void insert(Message<String> message) {
-        sqlClient.update(message.body(), res -> {
+        String sql = message.body();
+        log.debug(sql);
+        System.out.println(sql);
+        sqlClient.update(sql, res -> {
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {

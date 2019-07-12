@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 插入事件处理器
@@ -57,7 +58,7 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" ) VALUES ( ").append(String.join(", ", targetColumnValues));
         sqlBuilder.append(");");
         String sql = sqlBuilder.toString();
-        eventBus.publish(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
+        eventBus.send(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
     }
 
 

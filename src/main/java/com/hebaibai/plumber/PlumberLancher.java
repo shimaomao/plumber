@@ -1,5 +1,6 @@
 package com.hebaibai.plumber;
 
+import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.verticle.BinLogVerticle;
 import com.hebaibai.plumber.verticle.DataBaseVerticle;
 import io.vertx.core.Context;
@@ -12,6 +13,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**

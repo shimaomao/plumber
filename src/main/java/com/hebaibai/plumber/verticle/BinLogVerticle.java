@@ -5,7 +5,6 @@ import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
 import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.BinlogEventListener;
 import com.hebaibai.plumber.core.handler.EventHandler;
-import com.hebaibai.plumber.core.handler.TableMapEventHandlerImpl;
 import io.vertx.core.AbstractVerticle;
 import lombok.Getter;
 import lombok.Setter;
@@ -54,14 +53,7 @@ public class BinLogVerticle extends AbstractVerticle {
                 dataSourceConfig.getUsername(),
                 dataSourceConfig.getPassword()
         );
-        this.binlogEventListener = new BinlogEventListener(dataSourceConfig, vertx.eventBus());
-        //监控表，数据库
-        if (this.eventHandlers == null) {
-            eventHandlers = new HashSet<>();
-        }
-        EventHandler eventHandler = new TableMapEventHandlerImpl();
-        eventHandler.setDataSourceConfig(dataSourceConfig);
-        this.eventHandlers.add(eventHandler);
+        this.binlogEventListener = new BinlogEventListener(vertx.eventBus());
         //其他的处理器
         this.binlogEventListener.setEventHandlers(this.eventHandlers);
         binlogThread.binaryLogClient.setEventDeserializer(eventDeserializer);

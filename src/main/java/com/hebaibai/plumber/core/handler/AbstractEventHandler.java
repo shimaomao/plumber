@@ -16,8 +16,6 @@ import java.util.Set;
 @Slf4j
 public abstract class AbstractEventHandler implements EventHandler {
 
-    protected DataSource targetDataSource;
-
     protected String targetDatabase;
 
     protected String targetTable;
@@ -50,11 +48,6 @@ public abstract class AbstractEventHandler implements EventHandler {
         this.targetDatabase = targetTableMateData.getDataBase();
         this.targetTable = targetTableMateData.getNama();
         this.targetTableMateData = targetTableMateData;
-    }
-
-    @Override
-    public void setDataSourceConfig(DataSourceConfig dataSourceConfig) {
-        this.dataSourceConfig = dataSourceConfig;
     }
 
     @Override

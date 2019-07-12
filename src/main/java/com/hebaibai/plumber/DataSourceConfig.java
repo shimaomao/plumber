@@ -1,5 +1,6 @@
 package com.hebaibai.plumber;
 
+import com.hebaibai.plumber.core.TableIdMapping;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,48 +35,6 @@ public class DataSourceConfig {
     @Setter
     private String mark;
 
-    private TableIdMapping tableIdMapping = new TableIdMapping();
-
-
-    public void seveTableName(long tableId, String tableName) {
-        tableIdMapping.tableNameTableIdMap.put(tableId, tableName);
-    }
-
-    public void seveDatabaseName(long tableId, String databaseName) {
-        tableIdMapping.tableIdDatabaseName.put(tableId, databaseName);
-    }
-
-    public String getTableName(Long tableId) {
-        if (tableId == null) {
-            return null;
-        }
-        return tableIdMapping.tableNameTableIdMap.get(tableId);
-    }
-
-    public String getDatabaseName(Long tableId) {
-        if (tableId == null) {
-            return null;
-        }
-        return tableIdMapping.tableIdDatabaseName.get(tableId);
-    }
-
-    /**
-     * 数据库元数据
-     */
-    private class TableIdMapping {
-
-        /**
-         * key sourceDatabase.sourceTable
-         * value tableId
-         */
-        Map<Long, String> tableNameTableIdMap = new HashMap<>();
-
-        /**
-         * key sourceDatabase.sourceTable
-         */
-        Map<Long, String> tableIdDatabaseName = new HashMap<>();
-
-    }
 
     @Override
     public boolean equals(Object o) {

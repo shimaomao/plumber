@@ -1,10 +1,7 @@
 package com.hebaibai.plumber.core;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
-import com.github.shyiko.mysql.binlog.event.Event;
-import com.github.shyiko.mysql.binlog.event.EventData;
-import com.github.shyiko.mysql.binlog.event.EventHeader;
-import com.github.shyiko.mysql.binlog.event.EventType;
+import com.github.shyiko.mysql.binlog.event.*;
 import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
@@ -21,14 +18,13 @@ import java.util.Set;
 @Slf4j
 public class BinlogEventListener implements BinaryLogClient.EventListener {
 
-    private DataSourceConfig dataSourceConfig;
-
     private EventBus eventBus;
 
     private Set<EventHandler> eventHandlers;
 
-    public BinlogEventListener(DataSourceConfig dataSourceConfig, EventBus eventBus) {
-        this.dataSourceConfig = dataSourceConfig;
+    private TableIdMapping tableIdMapping = new TableIdMapping();
+
+    public BinlogEventListener(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
@@ -51,14 +47,27 @@ public class BinlogEventListener implements BinaryLogClient.EventListener {
         EventHeader header = event.getHeader();
         EventType eventType = header.getEventType();
         EventData data = event.getData();
-        boolean trueType = EventType.TABLE_MAP == eventType || EventType.isRowMutation(eventType);
-        if (!trueType) {
+        if (EventType.TABLE_MAP == eventType) {
+            TableMapEventData tableMapEventData = EventDataUtils.getTableMapEventData(data);
+            long tableId = tableMapEventData.getTableId();
+            String tableName = tableMapEventData.getTable();
+            String databaseName = tableMapEventData.getDatabase();
+            tableIdMapping.seveTableName(tableId, tableName);
+            tableIdMapping.seveDatabaseName(tableId, databaseName);
             return;
         }
+        if (!EventType.isRowMutation(eventType)) {
+            return;
+        }
+
         log.debug("binlog event: {}", event);
+
+        if (eventHandlers == null) {
+            return;
+        }
         Long tableId = EventDataUtils.getTableId(data);
-        String tableName = dataSourceConfig.getTableName(tableId);
-        String databaseName = dataSourceConfig.getDatabaseName(tableId);
+        String tableName = tableIdMapping.getTableName(tableId);
+        String databaseName = tableIdMapping.getDatabaseName(tableId);
         for (EventHandler handle : eventHandlers) {
             boolean support = handle.support(eventType, databaseName, tableName);
             if (!support) {
