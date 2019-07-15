@@ -50,6 +50,9 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
                 continue;
             }
             String targetName = mapping.get(sourceName);
+            if (targetName == null) {
+                continue;
+            }
             //如果是key，以key为条件执行更新
             if (isKey) {
                 updateKeyColumns.add("`" + targetName + "` = '" + befor[i] + "'");

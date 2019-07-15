@@ -92,14 +92,8 @@ public class PlumberLancherTest {
         plumberLancher.setContext(context);
         //启动
         plumberLancher.start();
-        for (String verticleId : plumberLancher.verticleIds()) {
-            System.out.println(verticleId);
-        }
         TimeUnit.SECONDS.sleep(5);
         //停止
         plumberLancher.stop();
-        for (String verticleId : plumberLancher.verticleIds()) {
-            System.out.println(verticleId);
-        }
     }
 }

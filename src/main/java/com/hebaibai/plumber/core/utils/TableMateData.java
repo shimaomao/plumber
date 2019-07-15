@@ -21,4 +21,6 @@ public class TableMateData {
 
     private Map<String, String> columnType;
 
+    private Map<String, String> columnDoc;
+
 }

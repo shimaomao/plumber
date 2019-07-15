@@ -10,7 +10,7 @@ public class DataTargetConfig {
     private int port;
     private String username;
     private String password;
-    private String charset;
+    private String charset = "utf-8";
     private Integer maxPoolSize = 10;
     private Integer queryTimeout = 5000;
     private Integer connectTimeout = 10000;

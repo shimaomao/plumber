@@ -22,20 +22,14 @@ public class DataBaseVerticle extends AbstractVerticle {
 
     private AsyncSQLClient sqlClient;
 
-    private DataTargetConfig targetConfig;
-
     public static final String DATA_BASE_POOL_NAME = "plumber_pool";
 
-    public DataBaseVerticle(DataTargetConfig targetConfig) {
-        this.targetConfig = targetConfig;
+    public DataBaseVerticle(AsyncSQLClient sqlClient) {
+        this.sqlClient = sqlClient;
     }
 
     @Override
     public void start() throws Exception {
-        JsonObject json = targetConfig.getJson();
-        log.info("sql client :{}", json);
-        this.sqlClient = MySQLClient.createShared(vertx, json, "plumber_pool:" + targetConfig.getHost());
-
         EventBus eventBus = vertx.eventBus();
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_QUERY, this::query);
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_INSERT, this::insert);
@@ -46,13 +40,6 @@ public class DataBaseVerticle extends AbstractVerticle {
 
     @Override
     public void stop() throws Exception {
-        sqlClient.close(res -> {
-            if (res.succeeded()) {
-                log.info("stop AsyncSQLClient success");
-            } else {
-                log.info("stop AsyncSQLClient error");
-            }
-        });
         log.info("stop DataBaseVerticle success");
     }
 
@@ -64,7 +51,7 @@ public class DataBaseVerticle extends AbstractVerticle {
     public void query(Message<String> message) {
         String sql = message.body();
         sqlClient.query(sql, res -> {
-            log.debug(sql);
+            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getRows());
             } else {
@@ -82,7 +69,7 @@ public class DataBaseVerticle extends AbstractVerticle {
     public void update(Message<String> message) {
         String sql = message.body();
         sqlClient.update(sql, res -> {
-            log.debug(sql);
+            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {
@@ -100,7 +87,7 @@ public class DataBaseVerticle extends AbstractVerticle {
     public void delete(Message<String> message) {
         String sql = message.body();
         sqlClient.update(sql, res -> {
-            log.debug(sql);
+            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {
@@ -118,7 +105,7 @@ public class DataBaseVerticle extends AbstractVerticle {
     public void insert(Message<String> message) {
         String sql = message.body();
         sqlClient.update(sql, res -> {
-            log.debug(sql);
+            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {

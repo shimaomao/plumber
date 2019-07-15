@@ -73,7 +73,7 @@ public class SqlUtils {
                 continue;
             }
             //没想到有的表没有id /(ㄒoㄒ)/~~
-            if (nextLine.indexOf("PRIMARY KEY") != -1 || nextLine.indexOf("ENGINE=") != -1) {
+            if (nextLine.indexOf("PRIMARY KEY") != -1 || nextLine.indexOf("ENGINE=") != -1 || nextLine.indexOf("KEY") != -1) {
                 start = false;
                 continue;
             }

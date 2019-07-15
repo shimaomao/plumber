@@ -44,6 +44,9 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
             }
             //目标字段
             String targetName = mapping.get(sourceName);
+            if (targetName == null) {
+                continue;
+            }
             targetColumns.add("`" + targetName + "`");
             if (rows[i] == null) {
                 targetColumnValues.add("null");
