@@ -1,0 +1,121 @@
+<div class="layui-fluid layui-anim admin-anim" id="admin-dataConfig" lay-title="数据库配置">
+    <div class="layui-row admin-container">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body admin-table-full">
+                    <form class="layui-form layui-table-form" lay-filter="dataConfig-table-form">
+                        <div class="layui-row">
+                            <!--查询框-->
+                            <div class="layui-col-md10">
+                                <div class="layui-form-item">
+
+                                </div>
+                            </div>
+                            <div class="layui-col-md2 layui-col-sm12 layui-col-xs12 table-action-area">
+
+                                <!--下拉菜单-->
+                                <div class="layui-btn layui-btn-sm layui-btn-primary table-action action-more"
+                                     shiro:hasAnyPermissions="dataConfig:add,dataConfig:update">
+                                    <i class="layui-icon">&#xe875;</i>
+                                </div>
+
+                                <!--刷新-->
+                                <div class="layui-btn layui-btn-sm layui-btn-primary table-action" id="reset">
+                                    <i class="layui-icon">&#xe79b;</i>
+                                </div>
+
+                            </div>
+                        </div>
+                    </form>
+                    <table lay-filter="dataConfigTable" lay-data="{id: 'dataConfig'}"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--操作框-->
+<script type="text/html" id="dataConfig-option">
+    <span shiro:lacksPermission="dataConfig:update,dataConfig:delete">
+        <span class="layui-badge-dot admin-bg-orange"></span> 无权限
+    </span>
+
+    <a lay-event="edit" shiro:hasPermission="dataConfig:update">
+        <i class="layui-icon admin-edit-area admin-blue">&#xe7a4;</i></a>
+
+    <a lay-event="del" shiro:hasPermission="dataConfig:delete">
+        <i class="layui-icon admin-edit-area admin-red">&#xe7f9;</i></a>
+</script>
+<script type="text/html" id="dataConfig-type">
+    {{#
+    var type = {
+    1: {title: '来源', color: 'green'},
+    0: {title: '目标', color: 'blue'}
+    }[d.type];
+    }}
+    <span class="layui-badge admin-tag-{{type.color}}">{{ type.title }}</span>
+</script>
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['dropdown', 'jquery', 'laydate', 'form', 'table', 'admin', 'treeSelect'], function () {
+        var $ = layui.jquery,
+            laydate = layui.laydate,
+            admin = layui.admin,
+            form = layui.form,
+            table = layui.table,
+            treeSelect = layui.treeSelect,
+            dropdown = layui.dropdown,
+            $view = $('#admin-dataConfig'),
+            tableIns;
+
+        form.render();
+
+        initTable();
+
+        function initTable() {
+            tableIns = admin.table.init({
+                elem: $view.find('table'),
+                id: 'dataConfigTable',
+                url: ctx + 'dataConfig/list',
+                cols: [[
+                    {field: 'host', title: 'host'},
+                    {field: 'port', title: 'port'},
+                    {field: 'user', title: 'user'},
+                    {title: '类型', templet: '#dataConfig-type'},
+                    {field: 'mark', title: '备注'},
+                    {field: 'createTime', title: '创建时间'},
+                    {title: '操作', toolbar: '#dataConfig-option'}
+                ]]
+            });
+        }
+
+        laydate.render({
+            elem: '#createTime',
+            range: true,
+            trigger: 'click'
+        });
+
+        dropdown.render({
+            elem: $view.find('.action-more'),
+            click: function (name, elem, event) {
+
+            },
+            options: [{
+                name: 'add',
+                title: '新增',
+                perms: 'dataConfig:add'
+            }]
+        });
+
+        treeSelect.render({
+            elem: $view.find('#dept'),
+            type: 'get',
+            data: ctx + 'dept/select/tree',
+            placeholder: '请选择',
+            search: false
+        });
+
+        $("#reset").on('click', function () {
+            tableIns.reload({page: {curr: 1}});
+        });
+    })
+</script>

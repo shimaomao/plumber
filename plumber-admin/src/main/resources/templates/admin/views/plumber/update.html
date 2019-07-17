@@ -1,0 +1,151 @@
+<style>
+    #plumber-update {
+        padding: 20px 25px 25px 0;
+    }
+
+    #plumber-update .layui-treeSelect .ztree li a, .ztree li span {
+        margin: 0 0 2px 3px !important;
+    }
+</style>
+<div class="layui-fluid" id="plumber-update">
+    <form class="layui-form" action="" lay-filter="plumber-update-form">
+
+        <div class="layui-form-item admin-hide">
+            <label class="layui-form-label admin-form-item-require">id：</label>
+            <div class="layui-input-block">
+                <input type="text" name="id" data-th-value="${plumber.id}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label admin-form-item-require">名称：</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" lay-verify="required" maxlength="50" autocomplete="off"
+                       class="layui-input" data-th-value="${plumber.name}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label admin-form-item-require">来源库：</label>
+            <div class="layui-input-block">
+                <select name="dataSourceId" xm-select="plumber-add-dataSource" xm-select-radio lay-verify="required">
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label admin-form-item-require">目标库：</label>
+            <div class="layui-input-block">
+                <select name="dataTargetId" xm-select="plumber-add-dataTarget" xm-select-radio lay-verify="required">
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label admin-form-item-require">状态：</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" title="有效">
+                <input type="radio" name="status" value="0" title="禁用">
+            </div>
+        </div>
+
+        <div class="layui-form-item admin-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="plumber-update-form-submit" id="submit"></button>
+        </div>
+    </form>
+</div>
+
+<script data-th-inline="javascript">
+    layui.use(['admin', 'form', 'formSelects', 'validate', 'treeSelect'], function () {
+        var $ = layui.$,
+            admin = layui.admin,
+            layer = layui.layer,
+            formSelects = layui.formSelects,
+            form = layui.form,
+            plumber = [[${plumber}]],
+            validate = layui.validate;
+
+        form.val("plumber-update-form", {
+            "name": plumber.name,
+            "dataSourceId": plumber.dataSourceId,
+            "status": plumber.status + '',
+            "dataTargetId": plumber.dataTargetId
+        });
+
+        form.verify(validate);
+
+        form.render();
+
+        formSelects.render();
+
+        formSelects.config('plumber-add-dataSource', {
+            searchUrl: ctx + 'dataConfig',
+            response: {
+                statusCode: 200
+            },
+            data: {
+                type: 1//来源数据
+            },
+            beforeSuccess: function (id, url, searchVal, result) {
+                var data = result.data;
+                var tranData = [];
+                for (var i = 0; i < data.length; i++) {
+                    tranData.push({
+                        name: data[i].host + '@' + data[i].user,
+                        value: data[i].id
+                    })
+                }
+                result.data = tranData;
+                return result;
+            },
+            success: function () {
+                formSelects.value('plumber-add-dataSource', [plumber.dataSourceId]);
+            },
+            error: function (id, url, searchVal, err) {
+                console.error(err);
+                admin.alert.error('获取数据源失败');
+            }
+        });
+        formSelects.config('plumber-add-dataTarget', {
+            searchUrl: ctx + 'dataConfig',
+            response: {
+                statusCode: 200
+            },
+            data: {
+                type: 0//目标数据
+            },
+            beforeSuccess: function (id, url, searchVal, result) {
+                var data = result.data;
+                var tranData = [];
+                for (var i = 0; i < data.length; i++) {
+                    tranData.push({
+                        name: data[i].host + '@' + data[i].user,
+                        value: data[i].id
+                    })
+                }
+                result.data = tranData;
+                return result;
+            },
+            success: function () {
+                formSelects.value('plumber-add-dataTarget', [plumber.dataTargetId]);
+            },
+            error: function (id, url, searchVal, err) {
+                console.error(err);
+                admin.alert.error('获取数据源失败');
+            }
+        });
+
+        form.on('submit(plumber-update-form-submit)', function (data) {
+            if (admin.nativeEqual(data.field, plumber)) {
+                admin.alert.warn('数据未作任何修改！');
+                return false;
+            }
+            admin.post(ctx + 'plumber/update', data.field, function () {
+                layer.closeAll();
+                admin.alert.success(plumber.name + '实例改成功');
+                $("#reset").click();
+            });
+            return false;
+        });
+    });
+</script>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hebaibai.admin.plumber.mapper.ColumnMappingMapper">
+
+    <resultMap id="columnMapping" type="com.hebaibai.admin.plumber.entity.ColumnMapping">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="data_mapping_id" jdbcType="INTEGER" property="dataMappingId"/>
+        <result column="target" jdbcType="VARCHAR" property="target"/>
+        <result column="source" jdbcType="VARCHAR" property="source"/>
+        <result column="target_type" jdbcType="VARCHAR" property="targetType"/>
+        <result column="source_type" jdbcType="VARCHAR" property="sourceType"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+</mapper>

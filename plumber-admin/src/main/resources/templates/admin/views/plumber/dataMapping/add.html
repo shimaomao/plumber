@@ -1,0 +1,348 @@
+<style>
+    #dataMapping-add {
+        padding: 20px 25px 25px 0;
+    }
+
+    #dataMapping-add .layui-treeSelect .ztree li a, .ztree li span {
+        margin: 0 0 2px 3px !important;
+    }
+</style>
+
+<div class="layui-fluid" id="dataMapping-add">
+    <form class="layui-form" action="" lay-filter="dataMapping-add-form">
+
+        <div class="layui-form-item">
+            <div class="layui-collapse" lay-accordion>
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">基础数据</h2>
+                    <div class="layui-colla-content layui-show">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label admin-form-item-require">Plumber：</label>
+                            <div class="layui-input-block">
+                                <input id="plumberId" value="" style="display: none">
+                                <select name="dataSourceId" xm-select="dataMapping-add-dataSource" xm-select-radio lay-verify="required"> </select>
+                            </div>
+                        </div>
+                        <!-- 左边-->
+                        <div class="layui-col-md6">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label admin-form-item-require">来源库：</label>
+                                <div class="layui-input-block">
+                                    <select name="sourceDatabase" xm-select="dataMapping-add-sourceDatabase"
+                                            xm-select-radio lay-verify="required"> </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label admin-form-item-require">来源表：</label>
+                                <div class="layui-input-block">
+                                    <select name="sourceDatabase"
+                                            xm-select-search
+                                            xm-select="dataMapping-add-sourceTable"
+                                            xm-select-radio lay-verify="required"> </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!--右边-->
+                        <div class="layui-col-md6">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label admin-form-item-require">目标库：</label>
+                                <div class="layui-input-block">
+                                    <select name="sourceDatabase" xm-select="dataMapping-add-targetDatabase"
+                                            xm-select-radio lay-verify="required"> </select>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label admin-form-item-require">目标表：</label>
+                                <div class="layui-input-block">
+                                    <select name="sourceDatabase"
+                                            xm-select-search
+                                            xm-select="dataMapping-add-targetTable"
+                                            xm-select-radio lay-verify="required"> </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">目标表结构</h2>
+                    <div class="layui-colla-content layui-show">
+                        <table id="targetColumnMappingTable"></table>
+                    </div>
+                </div>
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">字段映射</h2>
+                    <div class="layui-colla-content layui-show">
+                        <table id="columnMappingTable" lay-data="{id:'columnMappingTable'}"></table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="layui-form-item admin-hide">
+            <button class="layui-btn" lay-submit="" lay-filter="dataMapping-add-form-submit" id="submit"></button>
+        </div>
+
+    </form>
+</div>
+
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['admin', 'form', 'formSelects', 'validate', 'treeSelect', 'laytpl', 'table'], function () {
+        var $ = layui.$,
+            admin = layui.admin,
+            table = layui.table,
+            formSelects = layui.formSelects,
+            form = layui.form,
+            $plumberId = $('#plumberId'),
+            columnMappingTable = [];
+        validate = layui.validate;
+
+        form.verify(validate);
+
+        form.render();
+
+        formSelects.render();
+
+        //选择实例
+        formSelects.config('dataMapping-add-dataSource', {
+            searchUrl: ctx + 'plumber',
+            response: {
+                statusCode: 200
+            },
+            beforeSuccess: function (id, url, searchVal, result) {
+                var data = result.data;
+                var tranData = [];
+                for (var i = 0; i < data.length; i++) {
+                    tranData.push({
+                        name: data[i].name,
+                        value: data[i].id
+                    })
+                }
+                result.data = tranData;
+                return result;
+            },
+            error: function (id, url, searchVal, err) {
+                console.error(err);
+                admin.alert.error('获取数据源失败');
+            }
+        });
+
+        //选择来源库,目标库
+        layui.formSelects.on('dataMapping-add-dataSource', function (id, vals, val, isAdd, isDisabled) {
+            //追加库
+            if (isAdd) {
+                $plumberId.val(val.value);
+                admin.get(ctx + 'dataMapping/database', {
+                    plumberId: val.value,
+                }, function (data) {
+                    //来源
+                    var rows = [];
+                    data.data['1'].forEach(function (obj, index) {
+                        rows.push({"name": obj, "value": index})
+                    });
+                    formSelects.data('dataMapping-add-sourceDatabase', 'local', {
+                        arr: rows
+                    });
+                    //目标
+                    rows = [];
+                    data.data['0'].forEach(function (obj, index) {
+                        rows.push({"name": obj, "value": index})
+                    });
+                    formSelects.data('dataMapping-add-targetDatabase', 'local', {
+                        arr: rows
+                    });
+                });
+            }
+            //清除
+            else {
+                formSelects.data('dataMapping-add-sourceDatabase', 'local', {
+                    arr: []
+                });
+                formSelects.data('dataMapping-add-targetDatabase', 'local', {
+                    arr: []
+                });
+                formSelects.data('dataMapping-add-sourceTable', 'local', {
+                    arr: []
+                });
+                formSelects.data('dataMapping-add-targetTable', 'local', {
+                    arr: []
+                });
+            }
+        });
+
+        //加载来源表
+        layui.formSelects.on('dataMapping-add-sourceDatabase', function (id, vals, val, isAdd, isDisabled) {
+            console.log(val)
+            if (isAdd) {
+                admin.get(ctx + 'dataMapping/table', {
+                    plumberId: $plumberId.val(),
+                    type: 1,
+                    dataBase: val.name
+                }, function (data) {
+                    //来源
+                    var rows = [];
+                    data.data.forEach(function (obj, index) {
+                        rows.push({"name": obj, "value": val.name + "|" + obj})
+                    });
+                    formSelects.data('dataMapping-add-sourceTable', 'local', {
+                        arr: rows
+                    });
+                });
+            } else {
+                formSelects.data('dataMapping-add-sourceTable', 'local', {
+                    arr: []
+                });
+            }
+        });
+
+        //加载目标表
+        layui.formSelects.on('dataMapping-add-targetDatabase', function (id, vals, val, isAdd, isDisabled) {
+            if (isAdd) {
+                admin.get(ctx + 'dataMapping/table', {
+                    plumberId: $plumberId.val(),
+                    type: 0,
+                    dataBase: val.name
+                }, function (data) {
+                    //来源
+                    var rows = [];
+                    data.data.forEach(function (obj, index) {
+                        rows.push({"name": obj, "value": val.name + "|" + obj})
+                    });
+                    formSelects.data('dataMapping-add-targetTable', 'local', {
+                        arr: rows
+                    });
+                });
+            } else {
+                formSelects.data('dataMapping-add-targetTable', 'local', {
+                    arr: []
+                });
+            }
+        });
+
+        layui.formSelects.on('dataMapping-add-targetTable', function (id, vals, val, isAdd, isDisabled) {
+            if (isAdd) {
+                initTargetTable([]);
+                admin.get(ctx + 'dataMapping/column', {
+                    plumberId: $plumberId.val(),
+                    type: 0,
+                    dataBase: val.value.split("|")[0],
+                    table: val.value.split("|")[1]
+                }, function (data) {
+                    var mappingData = []
+                    data.data.columns.forEach(function (obj, i) {
+                        mappingData.push({
+                            sc: obj,
+                            sct: data.data.columnType[obj],
+                            scd: data.data.columnDoc[obj],
+                        })
+                    });
+                    initTargetTable(mappingData);
+                });
+            }
+        });
+
+        layui.formSelects.on('dataMapping-add-sourceTable', function (id, vals, val, isAdd, isDisabled) {
+            if (isAdd) {
+                initMappingTable([]);
+                admin.get(ctx + 'dataMapping/column', {
+                    plumberId: $plumberId.val(),
+                    type: 1,
+                    dataBase: val.value.split("|")[0],
+                    table: val.value.split("|")[1]
+                }, function (data) {
+                    var mappingData = []
+                    data.data.columns.forEach(function (obj, i) {
+                        mappingData.push({
+                            sc: obj,
+                            sct: data.data.columnType[obj],
+                            scd: data.data.columnDoc[obj],
+                        })
+                    });
+                    initMappingTable(mappingData);
+                });
+            }
+        });
+
+        initMappingTable([]);
+
+        /**
+         *加载映射表数据
+         */
+        function initMappingTable(data) {
+            columnMappingTable = table.render({
+                elem: '#columnMappingTable',
+                cols: [[ //标题栏
+                    {title: 'key', type: 'radio'},
+                    {field: 'sc', title: '字段名称'},
+                    {field: 'sct', title: '字段类型'},
+                    {field: 'scd', title: '字段注释'},
+                    {field: 'tc', title: '目标字段', edit: 'text'},
+                ]],
+                skin: 'line',
+                limit: data.length,
+                data: data,
+            }).config.data;
+            console.debug(columnMappingTable);
+        }
+
+
+        /**
+         * 加载目标表结构
+         */
+        function initTargetTable(data) {
+            table.render({
+                elem: '#targetColumnMappingTable',
+                cols: [[ //标题栏
+                    {field: 'sc', title: '字段名称'},
+                    {field: 'sct', title: '字段类型'},
+                    {field: 'scd', title: '字段注释'},
+                ]],
+                skin: 'line',
+                limit: data.length,
+                data: data,
+            });
+        }
+
+        /**
+         * 提交表单
+         */
+        form.on('submit(dataMapping-add-form-submit)', function (data) {
+            var checkStatus = table.checkStatus('columnMappingTable');
+            if (checkStatus.data.length == 0) {
+                admin.alert.error('没有选择key!');
+                return false;
+            }
+            var key = checkStatus.data[0].sc;
+            var mapping = [];
+            columnMappingTable.forEach(function (obj, index) {
+                if (obj['tc'] == null || obj['tc'] == '') {
+                    return;
+                }
+                mapping.push({
+                    name: obj.sc,
+                    target: obj.tc
+                })
+            })
+            if (mapping.length == 0) {
+                admin.alert.error('没有设置映射!');
+                return false;
+            }
+            var data = {
+                plumberId: $plumberId.val() * 1,
+                sourceDatabase: formSelects.value("dataMapping-add-sourceDatabase")[0].name,
+                sourceTable: formSelects.value("dataMapping-add-sourceTable")[0].name,
+                targetDatabase: formSelects.value("dataMapping-add-targetDatabase")[0].name,
+                targetTable: formSelects.value("dataMapping-add-targetTable")[0].name,
+                mapping: mapping,
+                key: key
+            };
+            console.debug(data);
+            admin.postJson(ctx + 'dataMapping/save', data, function (data) {
+                layer.closeAll();
+                $("#reset").click();
+            });
+        });
+    });
+</script>

@@ -1,0 +1,138 @@
+<div class="layui-fluid layui-anim admin-anim" id="admin-dataMapping" lay-title="映射管理">
+    <div class="layui-row admin-container">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body admin-table-full">
+                    <form class="layui-form layui-table-form" lay-filter="dataMapping-table-form">
+                        <div class="layui-row">
+                            <!--查询框-->
+                            <div class="layui-col-md10">
+                                <div class="layui-form-item">
+
+                                </div>
+                            </div>
+                            <div class="layui-col-md2 layui-col-sm12 layui-col-xs12 table-action-area">
+
+                                <!--下拉菜单-->
+                                <div class="layui-btn layui-btn-sm layui-btn-primary table-action action-more"
+                                     shiro:hasAnyPermissions="dataMapping:add">
+                                    <i class="layui-icon">&#xe875;</i>
+                                </div>
+                                <!--刷新-->
+                                <div class="layui-btn layui-btn-sm layui-btn-primary table-action" id="reset">
+                                    <i class="layui-icon">&#xe79b;</i>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <table lay-filter="dataMappingTable" lay-data="{id: 'dataMapping'}"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--操作框-->
+<script type="text/html" id="dataMapping-option">
+    <span shiro:lacksPermission="dataMapping:update,dataMapping:delete">
+        <span class="layui-badge-dot admin-bg-orange"></span> 无权限
+    </span>
+
+    <a lay-event="delete" shiro:hasPermission="dataMapping:delete">
+        <i class="layui-icon admin-edit-area admin-red" title="删除">&#xe7f9;</i></a>
+
+
+</script>
+
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['dropdown', 'jquery', 'laydate', 'form', 'table', 'admin'], function () {
+        var $ = layui.jquery,
+            laydate = layui.laydate,
+            admin = layui.admin,
+            form = layui.form,
+            table = layui.table,
+            dropdown = layui.dropdown,
+            $view = $('#admin-dataMapping'),
+            tableIns;
+
+        form.render();
+
+        initTable();
+
+        function initTable() {
+            tableIns = admin.table.init({
+                elem: $view.find('table'),
+                id: 'dataMappingTable',
+                url: ctx + 'dataMapping/list',
+                cols: [[
+                    {field: 'sourceDatabase', title: '来源库'},
+                    {field: 'sourceTable', title: '来源表'},
+                    {field: 'targetDatabase', title: '目标库'},
+                    {field: 'targetTable', title: '目标表'},
+                    {field: 'mark', title: '备注'},
+                    {field: 'createTime', title: '创建时间'},
+                    {title: '操作', toolbar: '#dataMapping-option', minWidth: 200}
+                ]],
+                parseData: function (res) {
+                    var data = res.data.rows;
+                    return {
+                        "code": res.code === 200 ? 0 : res.code,
+                        "count": res.data.total,
+                        "data": data
+                    };
+                }
+            });
+        }
+
+        dropdown.render({
+            elem: $view.find('.action-more'),
+            click: function (name, elem, event) {
+
+            },
+            options: [{
+                name: 'add',
+                title: '新增',
+                perms: 'dataMapping:add'
+            }],
+            click: function (name, elem, event) {
+                if (name === 'add') {
+                    admin.modal.open('新增数据映射', 'dataMapping/add', {
+                        btn: ['提交'],
+                        area: ['100%', '100%'],
+                        yes: function (index, layero) {
+                            $('#dataMapping-add').find('#submit').trigger('click');
+                        }
+                    });
+                }
+            }
+        });
+
+        table.on('tool(dataMappingTable)', function (obj) {
+            var data = obj.data,
+                layEvent = obj.event;
+            if (layEvent === 'delete') {
+                admin.modal.confirm('删除映射', '是否删除该映射，此操作会删除相关所有信息！', function () {
+                    admin.get(ctx + 'dataMapping/' + data.id + '/delete', null, function () {
+                        admin.alert.success('删除成功');
+                        $("#reset").click();
+                    });
+                });
+            }
+            if (layEvent === 'edit') {
+                admin.modal.open('编辑dataMapping实例', 'dataMapping/' + data.id + '/update', {
+                    area: $(window).width() <= 750 ? '95%' : '50%',
+                    btn: ['提交', '取消'],
+                    yes: function (index, layero) {
+                        $('#dataMapping-update').find('#submit').trigger('click');
+                    },
+                    btn2: function () {
+                        layer.closeAll();
+                    }
+                });
+            }
+        });
+        $("#reset").on('click', function () {
+            tableIns.reload({page: {curr: 1}});
+        });
+    })
+</script>
