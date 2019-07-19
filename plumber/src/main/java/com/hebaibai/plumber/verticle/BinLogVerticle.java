@@ -2,6 +2,7 @@ package com.hebaibai.plumber.verticle;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
+import com.hebaibai.plumber.Config;
 import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.BinlogEventListener;
 import com.hebaibai.plumber.core.handler.EventHandler;
@@ -31,35 +32,43 @@ public class BinLogVerticle extends AbstractVerticle {
         eventDeserializer.setCompatibilityMode(EventDeserializer.CompatibilityMode.CHAR_AND_BINARY_AS_BYTE_ARRAY);
     }
 
-    @Getter
-    private DataSourceConfig dataSourceConfig;
-
     private BinlogThread binlogThread = new BinlogThread();
 
     private BinlogEventListener binlogEventListener;
 
-    @Setter
-    private Set<EventHandler> eventHandlers;
+    private Config config;
 
-    public BinLogVerticle(DataSourceConfig dataSourceConfig) {
-        this.dataSourceConfig = dataSourceConfig;
+    public BinLogVerticle(Config config) {
+        this.config = config;
     }
 
     @Override
     public void start() {
+        //BinaryLogClient
         binlogThread.binaryLogClient = new BinaryLogClient(
-                dataSourceConfig.getHostname(),
-                dataSourceConfig.getPort(),
-                dataSourceConfig.getUsername(),
-                dataSourceConfig.getPassword()
+                config.getDataSourceConfig().getHostname(),
+                config.getDataSourceConfig().getPort(),
+                config.getDataSourceConfig().getUsername(),
+                config.getDataSourceConfig().getPassword()
         );
+        //设置事件处理器
         this.binlogEventListener = new BinlogEventListener(vertx.eventBus());
-        //其他的处理器
-        this.binlogEventListener.setEventHandlers(this.eventHandlers);
-        binlogThread.binaryLogClient.setEventDeserializer(eventDeserializer);
         binlogThread.binaryLogClient.registerEventListener(this.binlogEventListener);
+        //设置模式
+        binlogThread.binaryLogClient.setEventDeserializer(eventDeserializer);
+        //binlog名称
+        if (config.getLogName() != null) {
+            binlogThread.binaryLogClient.setBinlogFilename(config.getLogName());
+            //binlog位置
+            if (config.getPosition() != null) {
+                binlogThread.binaryLogClient.setBinlogPosition(config.getPosition());
+            }
+        }
+        log.info("start BinLogVerticle Filename:{}, Position:{}", config.getLogName(), config.getPosition());
+        //用户定义的事件处理器
+        this.binlogEventListener.setEventHandlers(config.getEventHandlers());
         //设置binlog_client线程名称
-        binlogThread.setName("binlog_client:" + dataSourceConfig.getHostname());
+        binlogThread.setName("binlog_client:" + config.getDataSourceConfig().getHostname());
         binlogThread.start();
         log.info("start BinLogVerticle success");
     }

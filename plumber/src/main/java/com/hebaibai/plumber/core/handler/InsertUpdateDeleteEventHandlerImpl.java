@@ -1,6 +1,7 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
+import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import com.hebaibai.plumber.core.utils.TableMateData;
@@ -75,11 +76,11 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
     }
 
     @Override
-    public boolean support(EventType eventType, String dataBaseName, String tableName) {
+    public boolean support(EventHeader eventHeader, String dataBaseName, String tableName) {
         if (!status) {
             return false;
         }
-        if (!EventType.isRowMutation(eventType)) {
+        if (!EventType.isRowMutation(eventHeader.getEventType())) {
             return false;
         }
         return sourceDatabase.equals(dataBaseName) && sourceTable.equals(tableName);

@@ -6,6 +6,7 @@ import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
@@ -17,6 +18,12 @@ import java.util.Set;
  */
 @Slf4j
 public class BinlogEventListener implements BinaryLogClient.EventListener {
+
+    @Getter
+    private Long nowPosition;
+
+    @Getter
+    private Long nextPosition;
 
     private EventBus eventBus;
 
@@ -46,7 +53,12 @@ public class BinlogEventListener implements BinaryLogClient.EventListener {
     public void onEvent(Event event) {
         EventHeader header = event.getHeader();
         EventType eventType = header.getEventType();
+        if (header instanceof EventHeaderV4) {
+            nowPosition = ((EventHeaderV4) header).getPosition();
+            nextPosition = ((EventHeaderV4) header).getNextPosition();
+        }
         EventData data = event.getData();
+        //缓存tableId 与 tableName,databaseName
         if (EventType.TABLE_MAP == eventType) {
             TableMapEventData tableMapEventData = EventDataUtils.getTableMapEventData(data);
             long tableId = tableMapEventData.getTableId();
@@ -56,20 +68,15 @@ public class BinlogEventListener implements BinaryLogClient.EventListener {
             tableIdMapping.seveDatabaseName(tableId, databaseName);
             return;
         }
-        if (!EventType.isRowMutation(eventType)) {
-            return;
-        }
-
-        log.debug("binlog event: {}", event);
-
         if (eventHandlers == null) {
             return;
         }
         Long tableId = EventDataUtils.getTableId(data);
         String tableName = tableIdMapping.getTableName(tableId);
         String databaseName = tableIdMapping.getDatabaseName(tableId);
+        //循环处理,可能一次事件由多个handle共同处理
         for (EventHandler handle : eventHandlers) {
-            boolean support = handle.support(eventType, databaseName, tableName);
+            boolean support = handle.support(header, databaseName, tableName);
             if (!support) {
                 continue;
             }

@@ -64,8 +64,7 @@ public class PlumberLancher {
             }
         });
 
-        BinLogVerticle binLogVerticle = new BinLogVerticle(this.config.getDataSourceConfig());
-        binLogVerticle.setEventHandlers(this.config.getEventHandlers());
+        BinLogVerticle binLogVerticle = new BinLogVerticle(this.config);
         binLogVerticle.init(vertx, context);
         vertx.deployVerticle(binLogVerticle, res -> {
             if (res.succeeded()) {

@@ -1,6 +1,7 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
+import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.ConsumerAddress;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
@@ -10,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 更新事件处理器
@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 public class UpdateEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     @Override
-    public boolean support(EventType eventType, String dataBaseName, String tableName) {
+    public boolean support(EventHeader eventHeader, String dataBaseName, String tableName) {
         if (!status) {
             return false;
         }
-        if (!EventType.isUpdate(eventType)) {
+        if (!EventType.isUpdate(eventHeader.getEventType())) {
             return false;
         }
         return sourceDatabase.equals(dataBaseName) && sourceTable.equals(tableName);

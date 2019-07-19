@@ -19,6 +19,7 @@ public class ConversionFactory {
             new BigDecimalToStringConversion(),
             new BytesToStringConversion(),
             new IntToStringConversion(),
+            new DateToStringConversion(),
             new LongToStringConversion()
     );
 

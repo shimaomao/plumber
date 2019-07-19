@@ -1,8 +1,7 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
-import com.github.shyiko.mysql.binlog.event.EventType;
-import com.hebaibai.plumber.DataSourceConfig;
+import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.eventbus.EventBus;
 
@@ -33,12 +32,12 @@ public interface EventHandler {
     /**
      * 是否支持当前操作
      *
-     * @param eventType
+     * @param eventHeader
      * @param dataBaseName
      * @param tableName
      * @return
      */
-    boolean support(EventType eventType, String dataBaseName, String tableName);
+    boolean support(EventHeader eventHeader, String dataBaseName, String tableName);
 
 
     /**
