@@ -20,6 +20,7 @@ public class ConversionFactory {
             new BytesToStringConversion(),
             new IntToStringConversion(),
             new DateToStringConversion(),
+            new SqlDateToStringConversion(),
             new DoubleToStringConversion(),
             new LongToStringConversion()
     );

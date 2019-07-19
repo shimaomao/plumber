@@ -15,10 +15,12 @@ import java.util.Map;
 public class TableMateDataUtils {
 
 
-    public static TableMateData getTableMateData(String createSql, String table, String database) throws SQLException {
+    public static TableMateData getTableMateData(String createSql, String database) throws SQLException {
 
         TableMateData mateData = new TableMateData();
-        mateData.setNama(table);
+
+        mateData.setNama(SqlUtils.getTableName(createSql));
+
         mateData.setDataBase(database);
         //字段信息
         List<String> columnSqls = SqlUtils.getColumnSqls(createSql);

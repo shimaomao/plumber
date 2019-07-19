@@ -84,7 +84,6 @@ public class PrintEventHandlerImpl extends AbstractEventHandler implements Event
 
     private void printAfter(String[] vals) {
         System.out.print(Arrays.toString(vals));
-
     }
 
     private void printDelete(String[] vals) {
