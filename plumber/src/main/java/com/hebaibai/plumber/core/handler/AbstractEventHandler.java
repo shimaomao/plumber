@@ -4,7 +4,6 @@ import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.sql.DataSource;
 import java.util.Map;
 import java.util.Set;
 
