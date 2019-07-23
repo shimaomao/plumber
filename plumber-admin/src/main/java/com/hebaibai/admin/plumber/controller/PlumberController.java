@@ -10,6 +10,7 @@ import com.hebaibai.admin.plumber.LancherCache;
 import com.hebaibai.admin.plumber.entity.Plumber;
 import com.hebaibai.admin.plumber.service.PlumberOperationService;
 import com.hebaibai.admin.plumber.service.IPlumberService;
+import com.hebaibai.plumber.Config;
 import com.hebaibai.plumber.PlumberLancher;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -41,6 +42,9 @@ public class PlumberController extends BaseController {
     private IPlumberService plumberService;
 
     @Autowired
+    private LancherCache lancherCache;
+
+    @Autowired
     private PlumberOperationService plumberOperationService;
 
     @GetMapping("plumber")
@@ -59,7 +63,7 @@ public class PlumberController extends BaseController {
         List<Plumber> plumbers = plumberIPage.getRecords();
         for (Plumber obj : plumbers) {
             String id = obj.getId().toString();
-            PlumberLancher plumberLancher = LancherCache.plumberLancher.get(id);
+            PlumberLancher plumberLancher = lancherCache.getPlumberLancher();
             if (plumberLancher == null) {
                 obj.setRunStatus("no-publish");
             } else if (plumberLancher.isRun()) {
@@ -78,8 +82,12 @@ public class PlumberController extends BaseController {
     @RequiresPermissions("plumber:add")
     public FebsResponse addPlumber(@Valid Plumber plumber) throws FebsException {
         try {
-            this.plumberService.createPlumber(plumber);
-            return new FebsResponse().success();
+            List<Plumber> plumbers = this.plumberService.findPlumbers(plumber);
+            if (plumbers.size() == 0) {
+                this.plumberService.createPlumber(plumber);
+                return new FebsResponse().success();
+            }
+            return new FebsResponse().fail().message("只能添加一个");
         } catch (Exception e) {
             String message = "新增Plumber失败";
             log.error(message, e);
@@ -92,18 +100,16 @@ public class PlumberController extends BaseController {
     @ResponseBody
     @RequiresPermissions("plumber:delete")
     public FebsResponse deletePlumber(@PathVariable String id) throws FebsException {
+        //实例在运行中
+        if (lancherCache.isRun()) {
+            return new FebsResponse().fail().message("实例运行中，请先停掉实例");
+        }
         try {
             Plumber plumber = this.plumberService.getById(id);
             if (plumber == null) {
                 return new FebsResponse().fail().message("实例不存在");
             }
-            PlumberLancher plumberLancher = LancherCache.plumberLancher.get(id);
-            //实例在运行中
-            if (plumberLancher != null && plumberLancher.isRun()) {
-                return new FebsResponse().fail().message("实例运行中，请先停掉实例");
-            }
             this.plumberService.deletePlumberAllById(id);
-            LancherCache.plumberLancher.remove(id);
             return new FebsResponse().success();
         } catch (Exception e) {
             String message = "删除Plumber失败";
@@ -117,12 +123,11 @@ public class PlumberController extends BaseController {
     @ResponseBody
     @RequiresPermissions("plumber:update")
     public FebsResponse updatePlumber(Plumber plumber) throws FebsException {
+        //实例在运行中
+        if (lancherCache.isRun()) {
+            return new FebsResponse().fail().message("实例运行中，请先停掉实例");
+        }
         try {
-            PlumberLancher plumberLancher = LancherCache.plumberLancher.get(plumber.getId() + "");
-            //实例在运行中
-            if (plumberLancher != null && plumberLancher.isRun()) {
-                return new FebsResponse().fail().message("实例运行中，请先停掉实例");
-            }
             this.plumberService.updatePlumber(plumber);
             return new FebsResponse().success();
         } catch (Exception e) {
@@ -132,54 +137,22 @@ public class PlumberController extends BaseController {
         }
     }
 
-    @Log("发布Plumber")
-    @GetMapping("plumber/{id}/publish")
-    @RequiresPermissions("plumber:update")
-    @ResponseBody
-    synchronized public FebsResponse publish(@PathVariable String id) throws FebsException {
-        Plumber plumber = this.plumberService.getById(id);
-        if (plumber == null || plumber.getStatus() == 0) {
-            return new FebsResponse().fail().message("实例状态异常");
-        }
-        try {
-            PlumberLancher plumberLancher = LancherCache.plumberLancher.get(id);
-            //实例不存在，创建
-            if (plumberLancher == null) {
-                plumberLancher = plumberOperationService.createLancher(plumber);
-            }
-            //实例在运行中
-            else if (plumberLancher.isRun()) {
-                return new FebsResponse().fail().message("实例运行中，请先停掉实例");
-            }
-            //实例已经停止，重新发布
-            else if (!plumberLancher.isRun()) {
-                plumberOperationService.updateLancher(plumberLancher, plumber);
-                LancherCache.plumberLancher.put(id, plumberLancher);
-            }
-            //重新缓存
-            LancherCache.plumberLancher.put(id, plumberLancher);
-            return new FebsResponse().success();
-        } catch (Exception e) {
-            String message = "启动Plumber失败";
-            log.error(message, e);
-            throw new FebsException(message);
-        }
-    }
 
     @Log("启动Plumber")
     @GetMapping("plumber/{id}/run")
     @ResponseBody
     synchronized public FebsResponse run(@PathVariable String id) throws FebsException {
+        //实例在运行中
+        if (lancherCache.isRun()) {
+            return new FebsResponse().fail().message("实例运行中，请先停掉实例");
+        }
         Plumber plumber = this.plumberService.getById(id);
         if (plumber == null || plumber.getStatus() == 0) {
             return new FebsResponse().fail().message("实例状态异常");
         }
         try {
-            PlumberLancher plumberLancher = LancherCache.plumberLancher.get(id);
-            if (plumberLancher == null) {
-                return new FebsResponse().fail().message("实例没有发布");
-            }
-            plumberLancher.start();
+            Config lancherConfig = plumberOperationService.getLancherConfig(plumber);
+            lancherCache.start(lancherConfig);
             plumber.setLastRun(new Date());
             plumberService.updatePlumber(plumber);
             return new FebsResponse().success();
@@ -194,19 +167,16 @@ public class PlumberController extends BaseController {
     @GetMapping("plumber/{id}/stop")
     @ResponseBody
     synchronized public FebsResponse stop(@PathVariable String id) throws FebsException {
+        //实例在运行中
+        if (!lancherCache.isRun()) {
+            return new FebsResponse().fail().message("实例已经停止");
+        }
         Plumber plumber = this.plumberService.getById(id);
         if (plumber == null || plumber.getStatus() == 0) {
             return new FebsResponse().fail().message("实例状态异常");
         }
         try {
-            PlumberLancher plumberLancher = LancherCache.plumberLancher.get(id);
-            if (plumberLancher == null) {
-                return new FebsResponse().fail().message("实例没有发布");
-            }
-            if (!plumberLancher.isRun()) {
-                return new FebsResponse().fail().message("已经停止");
-            }
-            plumberLancher.stop();
+            lancherCache.stop();
             return new FebsResponse().success();
         } catch (Exception e) {
             String message = "停止Plumber失败";

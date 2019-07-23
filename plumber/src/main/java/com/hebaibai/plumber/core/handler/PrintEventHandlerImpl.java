@@ -35,7 +35,7 @@ public class PrintEventHandlerImpl extends AbstractEventHandler implements Event
         }
         if (eventHeader instanceof EventHeaderV4) {
             EventHeaderV4 header = (EventHeaderV4) eventHeader;
-            System.out.println("NowPosition: " + header.getPosition() + " NextPosition: " + header.getNextPosition());
+            log.info("NowPosition: {} NextPosition: ", header.getPosition(), header.getNextPosition());
         }
         this.eventType = eventType.name();
         dbName = dataBaseName;
@@ -46,30 +46,24 @@ public class PrintEventHandlerImpl extends AbstractEventHandler implements Event
     @Override
     public void handle(EventBus eventBus, EventData data) {
 
-        log.info("new event print ... ");
         String[] befor = EventDataUtils.getBeforUpdate(data);
         String[] after = EventDataUtils.getAfterUpdate(data);
         String[] delete = EventDataUtils.getDeleteRows(data);
         String[] insert = EventDataUtils.getInsertRows(data);
 
-        System.out.print("new " + eventType.toLowerCase() + " event " + dbName + "." + tName + " : ");
+        log.info("new {} event {}.{}: ", eventType.toLowerCase(), dbName, tName);
         if (befor != null) {
-            System.out.print("\n\r\tupdate befor: ");
             printBefor(befor);
         }
         if (after != null) {
-            System.out.print("\n\r\tupdate after: ");
             printAfter(after);
         }
         if (delete != null) {
-            System.out.print("\n\r\tdelete : ");
             printDelete(delete);
         }
         if (insert != null) {
-            System.out.print("\n\r\tinsert : ");
             printInsert(insert);
         }
-        System.out.println("\r\n");
 
     }
 
@@ -79,18 +73,18 @@ public class PrintEventHandlerImpl extends AbstractEventHandler implements Event
     }
 
     private void printBefor(String[] vals) {
-        System.out.print(Arrays.toString(vals));
+        log.info("\tupdate befor: {}", Arrays.toString(vals));
     }
 
     private void printAfter(String[] vals) {
-        System.out.print(Arrays.toString(vals));
+        log.info("\tupdate after: {}", Arrays.toString(vals));
     }
 
     private void printDelete(String[] vals) {
-        System.out.print(Arrays.toString(vals));
+        log.info("\tdelete: {}", Arrays.toString(vals));
     }
 
-    private void printInsert(String[] insert) {
-        System.out.print(Arrays.toString(insert));
+    private void printInsert(String[] vals) {
+        log.info("\tinsert: {}", Arrays.toString(vals));
     }
 }

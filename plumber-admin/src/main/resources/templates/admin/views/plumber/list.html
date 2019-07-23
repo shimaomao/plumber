@@ -44,9 +44,6 @@
     <a lay-event="delete" shiro:hasPermission="plumber:delete">
         <i class="layui-icon admin-edit-area admin-red" title="删除">&#xe7f9;</i></a>
 
-    <a lay-event="publish" shiro:hasPermission="plumber:publish">
-        <i class="layui-icon admin-edit-area admin-blue" title="发布">&#xe865;</i></a>
-
     <a lay-event="run" shiro:hasPermission="plumber:run">
         <i class="layui-icon admin-edit-area admin-blue" title="运行">&#xe78b;</i></a>
 
@@ -149,14 +146,6 @@
         table.on('tool(plumberTable)', function (obj) {
             var data = obj.data,
                 layEvent = obj.event;
-            if (layEvent === 'publish') {
-                admin.modal.confirm('发布实例', '是否发布该实例', function () {
-                    admin.get(ctx + 'plumber/' + data.id + '/publish', null, function () {
-                        admin.alert.success('发布成功');
-                        $("#reset").click();
-                    });
-                });
-            }
             if (layEvent === 'run') {
                 admin.modal.confirm('启动实例', '是否启动该实例', function () {
                     admin.get(ctx + 'plumber/' + data.id + '/run', null, function () {

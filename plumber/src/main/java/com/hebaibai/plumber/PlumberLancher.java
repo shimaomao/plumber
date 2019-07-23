@@ -30,10 +30,6 @@ public class PlumberLancher {
     @Getter
     private Context context;
 
-    @Getter
-    @Setter
-    private Config config;
-
     private AsyncSQLClient sqlClient;
 
     @Getter
@@ -41,14 +37,10 @@ public class PlumberLancher {
 
     private List<String> verticleIds = new ArrayList<>();
 
-    public PlumberLancher(Config config) {
-        this.config = config;
-    }
-
     /**
      * 启动
      */
-    public void start() {
+    public void start(Config config) {
         DataTargetConfig dataTargetConfig = config.getDataTargetConfig();
         JsonObject json = dataTargetConfig.getJson();
         log.info("sql client :{}", json);
@@ -64,7 +56,7 @@ public class PlumberLancher {
             }
         });
 
-        BinLogVerticle binLogVerticle = new BinLogVerticle(this.config);
+        BinLogVerticle binLogVerticle = new BinLogVerticle(config);
         binLogVerticle.init(vertx, context);
         vertx.deployVerticle(binLogVerticle, res -> {
             if (res.succeeded()) {
@@ -94,12 +86,4 @@ public class PlumberLancher {
         run = false;
     }
 
-    /**
-     * 获取当前的verticleIds
-     *
-     * @return
-     */
-    private List<String> verticleIds() {
-        return verticleIds;
-    }
 }

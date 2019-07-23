@@ -36,16 +36,6 @@ public class AdminApplication {
     );
 
     @Bean
-    Vertx vertx() {
-        return Vertx.vertx();
-    }
-
-    @Bean
-    Context context(@Autowired Vertx vertx) {
-        return vertx.getOrCreateContext();
-    }
-
-    @Bean
     MapperScannerConfigurer mapperScannerConfigurer() {
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setBasePackage("com.hebaibai.admin.*.mapper");

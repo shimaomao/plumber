@@ -16,6 +16,8 @@ import com.hebaibai.admin.plumber.mapper.ColumnKeyMapper;
 import com.hebaibai.admin.plumber.mapper.ColumnMappingMapper;
 import com.hebaibai.admin.plumber.mapper.DataMappingMapper;
 import com.hebaibai.plumber.core.utils.TableMateData;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,7 +67,7 @@ public class DataMappingServiceImpl extends ServiceImpl<DataMappingMapper, DataM
 
     @Override
     @Transactional
-    public DataMapping saveDataMapping(String json) throws SQLException {
+    public DataMapping saveDataMapping(String json) throws Exception {
 
         JSONObject jsonObject = JSONObject.parseObject(json);
         int plumberId = jsonObject.getInteger("plumberId");
@@ -74,6 +76,10 @@ public class DataMappingServiceImpl extends ServiceImpl<DataMappingMapper, DataM
         String sourceTable = jsonObject.getString("sourceTable");
         String targetDatabase = jsonObject.getString("targetDatabase");
         String targetTable = jsonObject.getString("targetTable");
+
+        if (sourceDatabase.equals(targetDatabase) && sourceTable.equals(targetTable)) {
+            throw new UnsupportedOperationException("来源数据不能与目标数据相同");
+        }
 
         //保存
         DataMapping dataMapping = new DataMapping();
@@ -94,14 +100,22 @@ public class DataMappingServiceImpl extends ServiceImpl<DataMappingMapper, DataM
         columnKey.setCreateTime(new Date());
         columnKeyMapper.insert(columnKey);
 
-        TableMateData tableMateData = new TableMateDataUtils(
+        TableMateData sourceTableMateData = new TableMateDataUtils(
                 plumber.getSource(), sourceDatabase, sourceTable
         ).getTableMateData();
-        List<String> columns = tableMateData.getColumns();
+
+        TableMateData targetTableMateData = new TableMateDataUtils(
+                plumber.getTarget(), targetDatabase, targetTable
+        ).getTableMateData();
+
+        List<String> sourceColumns = sourceTableMateData.getColumns();
+
+        List<String> targetColumns = targetTableMateData.getColumns();
+
         JSONArray jsonArray = jsonObject.getJSONArray("mapping");
 
-        for (int i = 0; i < columns.size(); i++) {
-            String column = columns.get(i);
+        for (int i = 0; i < sourceColumns.size(); i++) {
+            String column = sourceColumns.get(i);
             String target = null;
             for (int j = 0; j < jsonArray.size(); j++) {
                 JSONObject object = jsonArray.getJSONObject(j);
@@ -109,6 +123,12 @@ public class DataMappingServiceImpl extends ServiceImpl<DataMappingMapper, DataM
                 if (column.equals(name)) {
                     target = object.getString("target");
                 }
+            }
+            if (StringUtils.isBlank(target)) {
+                continue;
+            }
+            if (targetColumns.indexOf(target) == -1) {
+                throw new UnsupportedOperationException("字段: " + target + " 不存在");
             }
             ColumnMapping columnMapping = new ColumnMapping();
             columnMapping.setDataMappingId(id);

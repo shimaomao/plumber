@@ -55,7 +55,7 @@ public interface IDataMappingService extends IService<DataMapping> {
      * @param json
      * @return
      */
-    DataMapping saveDataMapping(String json) throws SQLException;
+    DataMapping saveDataMapping(String json) throws Exception;
 
     void deleteDataMapping(String id);
 }

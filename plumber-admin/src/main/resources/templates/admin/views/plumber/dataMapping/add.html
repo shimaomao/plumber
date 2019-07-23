@@ -340,9 +340,15 @@
             };
             console.debug(data);
             admin.postJson(ctx + 'dataMapping/save', data, function (data) {
-                layer.closeAll();
-                $("#reset").click();
+                console.log(data)
+                if (data.code == 200) {
+                    layer.closeAll();
+                    $("#reset").click();
+                } else {
+                    admin.alert.error(data.message);
+                }
             });
+            return false;
         });
     });
 </script>

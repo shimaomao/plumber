@@ -578,6 +578,9 @@ layui.extend({
             data: JSON.stringify(params),
             success: function (data) {
                 resolveResponse(data, success);
+            },
+            error: function (data) {
+                resolveResponse(data, success);
             }
         });
     };

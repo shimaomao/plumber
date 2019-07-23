@@ -7,6 +7,7 @@ import com.hebaibai.plumber.DataTargetConfig;
 import com.hebaibai.plumber.PlumberLancher;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
+import com.hebaibai.plumber.core.handler.PrintEventHandlerImpl;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
@@ -43,19 +44,13 @@ public class PlumberOperationService {
     @Autowired
     private IPlumberService plumberService;
 
-    @Autowired
-    private Vertx vertx;
-
-    @Autowired
-    private Context context;
-
     /**
      * 创建实例
      *
      * @param plumber
      */
-    synchronized public PlumberLancher createLancher(Plumber plumber) {
-        log.info("createLancher PlumberLancher");
+    synchronized public Config getLancherConfig(Plumber plumber) {
+        log.info("getLancherConfig PlumberLancher");
         Config config = new Config();
         //数据源
         Integer dataSourceId = plumber.getDataSourceId();
@@ -81,50 +76,13 @@ public class PlumberOperationService {
             setPlumberId(plumber.getId());
         }});
         Set<EventHandler> eventHandlers = new HashSet<>();
+        eventHandlers.add(new PrintEventHandlerImpl());
         for (DataMapping dataMapping : dataMappings) {
             EventHandler eventHandler = getEventHandler(dataMapping);
             eventHandlers.add(eventHandler);
         }
         config.setEventHandlers(eventHandlers);
-        PlumberLancher plumberLancher = new PlumberLancher(config);
-        plumberLancher.setVertx(vertx);
-        plumberLancher.setContext(context);
-        return plumberLancher;
-    }
-
-    synchronized public void updateLancher(PlumberLancher plumberLancher, Plumber plumber) {
-        log.info("updateLancher PlumberLancher");
-        Config config = new Config();
-        //数据源
-        Integer dataSourceId = plumber.getDataSourceId();
-        DataConfig dataSource = dataConfigService.getById(dataSourceId);
-        DataSourceConfig dataSourceConfig = new DataSourceConfig();
-        config.setDataSourceConfig(dataSourceConfig);
-        dataSourceConfig.setHostname(dataSource.getHost());
-        dataSourceConfig.setPort(dataSource.getPort());
-        dataSourceConfig.setUsername(dataSource.getUser());
-        dataSourceConfig.setPassword(dataSource.getPwd());
-        //数据目标
-        Integer dataTargetId = plumber.getDataTargetId();
-        DataConfig dataTarget = dataConfigService.getById(dataTargetId);
-        DataTargetConfig dataTargetConfig = new DataTargetConfig();
-        config.setDataTargetConfig(dataTargetConfig);
-        dataTargetConfig.setHost(dataTarget.getHost());
-        dataTargetConfig.setPort(dataTarget.getPort());
-        dataTargetConfig.setUsername(dataTarget.getUser());
-        dataTargetConfig.setPassword(dataTarget.getPwd());
-
-        //获取实例的EventHandler
-        List<DataMapping> dataMappings = dataMappingService.findDataMappings(new DataMapping() {{
-            setPlumberId(plumber.getId());
-        }});
-        Set<EventHandler> eventHandlers = new HashSet<>();
-        for (DataMapping dataMapping : dataMappings) {
-            EventHandler eventHandler = getEventHandler(dataMapping);
-            eventHandlers.add(eventHandler);
-        }
-        config.setEventHandlers(eventHandlers);
-        plumberLancher.setConfig(config);
+        return config;
     }
 
 

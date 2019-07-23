@@ -1,17 +1,35 @@
 package com.hebaibai.admin.plumber;
 
+import com.hebaibai.plumber.Config;
 import com.hebaibai.plumber.PlumberLancher;
+import io.vertx.core.Vertx;
+import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
+@Component
 public class LancherCache {
 
-    /**
-     * key  :b_plumber表中的id
-     * value:PlumberLancher 实例
-     */
-    public static ConcurrentMap<String, PlumberLancher> plumberLancher = new ConcurrentHashMap<>();
+    private PlumberLancher plumberLancher = new PlumberLancher() {{
+        Vertx vertx = Vertx.vertx();
+        setVertx(vertx);
+        setContext(vertx.getOrCreateContext());
+    }};
 
+    public PlumberLancher getPlumberLancher() {
+        return plumberLancher;
+    }
 
+    public boolean isRun() {
+        return plumberLancher.isRun();
+    }
+
+    public void start(Config config) {
+        stop();
+        plumberLancher.start(config);
+    }
+
+    public void stop() {
+        if (plumberLancher.isRun()) {
+            plumberLancher.stop();
+        }
+    }
 }

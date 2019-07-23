@@ -25,8 +25,6 @@ public class PlumberViewController {
     @Autowired
     private IPlumberService iPlumberService;
 
-    @Autowired
-    private IDataMappingService dataMappingService;
 
     /**
      * 数据库设置

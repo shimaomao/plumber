@@ -70,12 +70,11 @@ public class DataMappingController extends BaseController {
     @ResponseBody
     public FebsResponse dataMappingSave(@RequestBody String json) throws FebsException {
         try {
-            DataMapping dataMapping = dataMappingService.saveDataMapping(json);
+            dataMappingService.saveDataMapping(json);
             return new FebsResponse().success();
         } catch (Exception e) {
-            String message = "新增DataMapping失败";
-            log.error(message, e);
-            throw new FebsException(message);
+            e.printStackTrace();
+            return new FebsResponse().fail().message("新增DataMapping失败: " + e.getMessage());
         }
     }
 
