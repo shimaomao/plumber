@@ -101,14 +101,14 @@ public class PlumberLancherTest {
         //启动前配置
         Vertx vertx = Vertx.vertx();
         Context context = vertx.getOrCreateContext();
-        PlumberLancher plumberLancher = new PlumberLancher(config);
+        PlumberLancher plumberLancher = new PlumberLancher();
         plumberLancher.setVertx(vertx);
         plumberLancher.setContext(context);
         //启动
-        plumberLancher.start();
+        plumberLancher.start(config);
         TimeUnit.SECONDS.sleep(10);
         //停止
-        plumberLancher.start();
+        plumberLancher.stop();
     }
 }
 
