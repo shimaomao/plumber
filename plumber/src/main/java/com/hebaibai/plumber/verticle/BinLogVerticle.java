@@ -3,19 +3,13 @@ package com.hebaibai.plumber.verticle;
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
 import com.hebaibai.plumber.Config;
-import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.BinlogEventListener;
-import com.hebaibai.plumber.core.handler.EventHandler;
 import io.vertx.core.AbstractVerticle;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 获取binlog
@@ -46,7 +40,7 @@ public class BinLogVerticle extends AbstractVerticle {
     public void start() {
         //BinaryLogClient
         binlogThread.binaryLogClient = new BinaryLogClient(
-                config.getDataSourceConfig().getHostname(),
+                config.getDataSourceConfig().getHost(),
                 config.getDataSourceConfig().getPort(),
                 config.getDataSourceConfig().getUsername(),
                 config.getDataSourceConfig().getPassword()
@@ -68,7 +62,7 @@ public class BinLogVerticle extends AbstractVerticle {
         //用户定义的事件处理器
         this.binlogEventListener.setEventHandlers(config.getEventHandlers());
         //设置binlog_client线程名称
-        binlogThread.setName("binlog_client:" + config.getDataSourceConfig().getHostname());
+        binlogThread.setName("binlog_client:" + config.getDataSourceConfig().getHost());
         binlogThread.start();
         log.info("start BinLogVerticle success");
     }

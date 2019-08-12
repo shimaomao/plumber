@@ -14,7 +14,7 @@ public class DataSourceConfig {
 
     @Getter
     @Setter
-    private String hostname = "localhost";
+    private String host = "localhost";
 
     @Getter
     @Setter
@@ -43,7 +43,7 @@ public class DataSourceConfig {
         }
         DataSourceConfig dataSourceConfig = (DataSourceConfig) o;
         return port == dataSourceConfig.port &&
-                Objects.equals(hostname, dataSourceConfig.hostname) &&
+                Objects.equals(host, dataSourceConfig.host) &&
                 Objects.equals(username, dataSourceConfig.username) &&
                 Objects.equals(password, dataSourceConfig.password) &&
                 Objects.equals(mark, dataSourceConfig.mark);
@@ -51,6 +51,6 @@ public class DataSourceConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(hostname, port, username, password, mark);
+        return Objects.hash(host, port, username, password, mark);
     }
 }
