@@ -2,27 +2,25 @@ package com.hebaibai.plumber.verticle;
 
 
 import com.hebaibai.plumber.ConsumerAddress;
-import com.hebaibai.plumber.DataSourceConfig;
-import com.hebaibai.plumber.DataTargetConfig;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.JULLogDelegateFactory;
+import io.vertx.core.spi.logging.LogDelegate;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
-import io.vertx.ext.asyncsql.MySQLClient;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hjx
  */
 @Setter
-@Slf4j
 public class DataBaseVerticle extends AbstractVerticle {
 
     private AsyncSQLClient sqlClient;
 
     public static final String DATA_BASE_POOL_NAME = "plumber_pool";
+
+    private static LogDelegate log = new JULLogDelegateFactory().createDelegate(DataBaseVerticle.class.getName());
 
     public DataBaseVerticle(AsyncSQLClient sqlClient) {
         this.sqlClient = sqlClient;

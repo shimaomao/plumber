@@ -8,7 +8,8 @@ import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import lombok.extern.slf4j.Slf4j;
+import io.vertx.core.logging.JULLogDelegateFactory;
+import io.vertx.core.spi.logging.LogDelegate;
 import org.apache.commons.cli.*;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
@@ -25,8 +26,13 @@ import java.util.*;
  *
  * @author hjx
  */
-@Slf4j
 public class Main {
+
+    static {
+        JULLogDelegateFactory.loadConfig();
+    }
+
+    static LogDelegate log = new JULLogDelegateFactory().createDelegate(Main.class.getName());
 
     public static void main(String[] args) {
         log.info("Main start ... ");
