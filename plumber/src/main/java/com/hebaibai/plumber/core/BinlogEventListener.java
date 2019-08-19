@@ -74,9 +74,13 @@ public class BinlogEventListener implements BinaryLogClient.EventListener {
         Long tableId = EventDataUtils.getTableId(data);
         String tableName = tableIdMapping.getTableName(tableId);
         String databaseName = tableIdMapping.getDatabaseName(tableId);
+        if (tableName == null || databaseName == null) {
+            return;
+        }
         //循环处理,可能一次事件由多个handle共同处理
         for (EventHandler handle : eventHandlers) {
             boolean support = handle.support(header, databaseName, tableName);
+            System.out.println(tableName + "===" + databaseName + "===" + support);
             if (!support) {
                 continue;
             }

@@ -35,6 +35,15 @@ public class Main {
             byte[] bytes = new byte[inputStream.available()];
             inputStream.read(bytes);
             JSONObject jsonObject = JSONObject.parseObject(new String(bytes, "utf-8"));
+            //binlog name position
+            String logName = jsonObject.getString("logName");
+            if (logName != null) {
+                config.setLogName(logName);
+                Long position = jsonObject.getLong("position");
+                if (position != null) {
+                    config.setPosition(position);
+                }
+            }
             //数据源配置
             DataSourceConfig dataSource = jsonObject.getObject("dataSource", DataSourceConfig.class);
             config.setDataSourceConfig(dataSource);
@@ -42,8 +51,11 @@ public class Main {
             DataTargetConfig dataTarget = jsonObject.getObject("dataTarget", DataTargetConfig.class);
             config.setDataTargetConfig(dataTarget);
 
-            Connection dataSourceConn = getConnection(dataSource.getHost(), dataSource.getPort(), dataSource.getUsername(), dataSource.getPassword());
-            Connection dataTargetConn = getConnection(dataTarget.getHost(), dataTarget.getPort(), dataTarget.getUsername(), dataTarget.getPassword());
+            Connection dataSourceConn = getConnection(
+                    dataSource.getHost(), dataSource.getPort(), dataSource.getUsername(), dataSource.getPassword());
+
+            Connection dataTargetConn = getConnection(
+                    dataTarget.getHost(), dataTarget.getPort(), dataTarget.getUsername(), dataTarget.getPassword());
 
             //eventHandler
             JSONArray eventHandlerArray = jsonObject.getJSONArray("eventHandler");
@@ -52,18 +64,39 @@ public class Main {
             for (int i = 0; i < eventHandlerArray.size(); i++) {
                 EventHandler eventHandler = new InsertUpdateDeleteEventHandlerImpl();
                 eventHandler.setStatus(true);
-
                 JSONObject eventHandlerJson = eventHandlerArray.getJSONObject(i);
+                //source table
+                String sourceTable = eventHandlerJson.getString("source");
+                String sourceSql = getCreateSql(dataSourceConn, dataSource.getDatabase(), sourceTable);
+                TableMateData sourceMateData = TableMateDataUtils.getTableMateData(sourceSql, dataSource.getDatabase());
+                eventHandler.setSource(sourceMateData);
+                //target table
+                String targetTable = eventHandlerJson.getString("target");
+                String targetSql = getCreateSql(dataTargetConn, dataTarget.getDatabase(), targetTable);
+                TableMateData targetMateData = TableMateDataUtils.getTableMateData(targetSql, dataTarget.getDatabase());
+                eventHandler.setTarget(targetMateData);
                 //mapping
                 JSONObject mapping = eventHandlerJson.getJSONObject("mapping");
-                Set<String> keySet = mapping.keySet();
-                Map<String, String> map = new HashMap<>();
-                Iterator<String> iterator = keySet.iterator();
-                while (iterator.hasNext()) {
-                    String key = iterator.next();
-                    map.put(key, mapping.getString(key));
+                //mapping != null , 两个表数据结构不相同( 数据转换同步 )
+                if (mapping != null) {
+                    Map<String, String> map = new HashMap<>();
+                    Set<String> keySet = mapping.keySet();
+                    Iterator<String> iterator = keySet.iterator();
+                    while (iterator.hasNext()) {
+                        String key = iterator.next();
+                        map.put(key, mapping.getString(key));
+                    }
+                    eventHandler.setMapping(map);
                 }
-                eventHandler.setMapping(map);
+                //mapping = null , 两个表数据结构相同( 数据直接同步 )
+                else {
+                    List<String> columns = targetMateData.getColumns();
+                    Map<String, String> map = new HashMap<>();
+                    for (String column : columns) {
+                        map.put(column, column);
+                    }
+                    eventHandler.setMapping(map);
+                }
                 //keys
                 JSONArray keysJson = eventHandlerJson.getJSONArray("keys");
                 Set<String> keys = new HashSet<>();
@@ -72,20 +105,7 @@ public class Main {
                     keys.add(key);
                 }
                 eventHandler.setKeys(keys);
-                //source table
-                JSONObject source = eventHandlerJson.getJSONObject("source");
-                String sourceDb = source.getString("dbName");
-                String sourceTable = source.getString("tableName");
-                String sourceSql = getCreateSql(dataSourceConn, sourceDb, sourceTable);
-                TableMateData sourceMateData = TableMateDataUtils.getTableMateData(sourceSql, sourceDb);
-                eventHandler.setSource(sourceMateData);
-                //source table
-                JSONObject target = eventHandlerJson.getJSONObject("target");
-                String targetDb = target.getString("dbName");
-                String targetTable = target.getString("tableName");
-                String targetSql = getCreateSql(dataTargetConn, targetDb, targetTable);
-                TableMateData targetMateData = TableMateDataUtils.getTableMateData(targetSql, targetDb);
-                eventHandler.setSource(targetMateData);
+
                 //add
                 eventHandlers.add(eventHandler);
             }

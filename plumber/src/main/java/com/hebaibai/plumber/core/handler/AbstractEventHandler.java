@@ -25,8 +25,6 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected boolean status = true;
 
-    protected DataSourceConfig dataSourceConfig;
-
     protected TableMateData sourceTableMateData;
 
     protected TableMateData targetTableMateData;
@@ -36,17 +34,17 @@ public abstract class AbstractEventHandler implements EventHandler {
     protected Set<String> keys;
 
     @Override
-    public void setSource(TableMateData sourceTableMateData) {
-        this.sourceDatabase = sourceTableMateData.getDataBase();
-        this.sourceTable = sourceTableMateData.getNama();
-        this.sourceTableMateData = sourceTableMateData;
+    public void setSource(TableMateData tableMateData) {
+        this.sourceDatabase = tableMateData.getDataBase();
+        this.sourceTable = tableMateData.getNama();
+        this.sourceTableMateData = tableMateData;
     }
 
     @Override
-    public void setTarget(TableMateData targetTableMateData) {
-        this.targetDatabase = targetTableMateData.getDataBase();
-        this.targetTable = targetTableMateData.getNama();
-        this.targetTableMateData = targetTableMateData;
+    public void setTarget(TableMateData tableMateData) {
+        this.targetDatabase = tableMateData.getDataBase();
+        this.targetTable = tableMateData.getNama();
+        this.targetTableMateData = tableMateData;
     }
 
     @Override

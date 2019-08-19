@@ -83,7 +83,8 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
         if (!EventType.isRowMutation(eventHeader.getEventType())) {
             return false;
         }
-        return sourceDatabase.equals(dataBaseName) && sourceTable.equals(tableName);
+        boolean support = sourceDatabase.equals(dataBaseName) && sourceTable.equals(tableName);
+        return support;
     }
 
     @Override

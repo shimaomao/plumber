@@ -56,6 +56,7 @@ public class DataBaseVerticle extends AbstractVerticle {
                 message.reply(res.result().getRows());
             } else {
                 message.fail(500, res.cause().toString());
+                res.cause().printStackTrace();
                 log.error("sql-query-->失败:", res.cause());
             }
         });
@@ -74,6 +75,7 @@ public class DataBaseVerticle extends AbstractVerticle {
                 message.reply(res.result().getUpdated());
             } else {
                 message.fail(500, res.cause().toString());
+                res.cause().printStackTrace();
                 log.error("sql-update-->失败:", res.cause());
             }
         });
@@ -92,6 +94,7 @@ public class DataBaseVerticle extends AbstractVerticle {
                 message.reply(res.result().getUpdated());
             } else {
                 message.fail(500, res.cause().toString());
+                res.cause().printStackTrace();
                 log.error("sql-delete:", res.cause());
             }
         });
@@ -110,6 +113,7 @@ public class DataBaseVerticle extends AbstractVerticle {
                 message.reply(res.result().getUpdated());
             } else {
                 message.fail(500, res.cause().toString());
+                res.cause().printStackTrace();
                 log.error("sql-insert:", res.cause());
             }
         });

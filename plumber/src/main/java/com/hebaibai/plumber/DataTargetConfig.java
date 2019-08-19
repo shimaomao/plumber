@@ -10,6 +10,7 @@ public class DataTargetConfig {
     private int port;
     private String username;
     private String password;
+    private String database;
     private String charset = "utf-8";
     private Integer maxPoolSize = 10;
     private Integer queryTimeout = 5000;
@@ -21,6 +22,7 @@ public class DataTargetConfig {
                 .put("port", port)
                 .put("username", username)
                 .put("password", password)
+                .put("database", database)
                 .put("charset", charset)
                 .put("maxPoolSize", maxPoolSize)
                 .put("queryTimeout", queryTimeout)

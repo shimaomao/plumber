@@ -75,7 +75,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         sqlBuilder.append(" WHERE ");
         sqlBuilder.append(String.join("AND ", updateKeyColumns));
         String sql = sqlBuilder.toString();
-        eventBus.send(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
+        eventBus.send(ConsumerAddress.EXECUTE_SQL_UPDATE, sql);
     }
 
     @Override
