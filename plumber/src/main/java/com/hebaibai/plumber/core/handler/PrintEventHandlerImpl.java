@@ -6,7 +6,6 @@ import com.github.shyiko.mysql.binlog.event.EventHeaderV4;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
@@ -15,7 +14,6 @@ import java.util.Arrays;
  *
  * @author hjx
  */
-@Slf4j
 public class PrintEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     private String dbName;

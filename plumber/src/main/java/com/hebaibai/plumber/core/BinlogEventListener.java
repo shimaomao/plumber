@@ -2,12 +2,10 @@ package com.hebaibai.plumber.core;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.*;
-import com.hebaibai.plumber.DataSourceConfig;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
 
@@ -16,7 +14,6 @@ import java.util.Set;
  *
  * @author hjx
  */
-@Slf4j
 public class BinlogEventListener implements BinaryLogClient.EventListener {
 
     @Getter
@@ -80,7 +77,6 @@ public class BinlogEventListener implements BinaryLogClient.EventListener {
         //循环处理,可能一次事件由多个handle共同处理
         for (EventHandler handle : eventHandlers) {
             boolean support = handle.support(header, databaseName, tableName);
-            System.out.println(tableName + "===" + databaseName + "===" + support);
             if (!support) {
                 continue;
             }

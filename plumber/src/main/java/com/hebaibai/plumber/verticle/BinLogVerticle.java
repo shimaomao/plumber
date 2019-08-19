@@ -5,17 +5,19 @@ import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
 import com.hebaibai.plumber.Config;
 import com.hebaibai.plumber.core.BinlogEventListener;
 import io.vertx.core.AbstractVerticle;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.vertx.core.logging.JULLogDelegateFactory;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.spi.logging.LogDelegate;
 
 import java.io.IOException;
 
 /**
  * 获取binlog
  */
-@Slf4j
 public class BinLogVerticle extends AbstractVerticle {
+
+    private static LogDelegate log = new JULLogDelegateFactory().createDelegate(BinLogVerticle.class.getName());
 
     /**
      * 兼容模式

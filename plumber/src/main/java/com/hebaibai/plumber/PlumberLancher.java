@@ -5,6 +5,8 @@ import com.hebaibai.plumber.verticle.DataBaseVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.JULLogDelegateFactory;
+import io.vertx.core.spi.logging.LogDelegate;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.MySQLClient;
 import lombok.Getter;
@@ -19,7 +21,6 @@ import java.util.List;
  *
  * @author hjx
  */
-@Slf4j
 public class PlumberLancher {
 
     @Getter
@@ -36,6 +37,8 @@ public class PlumberLancher {
     private boolean run = false;
 
     private List<String> verticleIds = new ArrayList<>();
+
+    private static LogDelegate log = new JULLogDelegateFactory().createDelegate(PlumberLancher.class.getName());
 
     /**
      * 启动

@@ -6,7 +6,6 @@ import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.ConsumerAddress;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.Objects;
  *
  * @author hjx
  */
-@Slf4j
 public class UpdateEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     @Override

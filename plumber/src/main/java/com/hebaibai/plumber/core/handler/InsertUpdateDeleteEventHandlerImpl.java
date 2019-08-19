@@ -18,7 +18,6 @@ import java.util.Set;
  *
  * @author hjx
  */
-@Slf4j
 public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     private List<AbstractEventHandler> eventHandlers = Arrays.asList(

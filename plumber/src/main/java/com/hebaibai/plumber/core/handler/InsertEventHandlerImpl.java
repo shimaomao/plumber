@@ -16,7 +16,6 @@ import java.util.List;
  *
  * @author hjx
  */
-@Slf4j
 public class InsertEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     @Override
