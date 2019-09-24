@@ -9,7 +9,7 @@
 
 ### 使用条件
 
-mysql开启binlog记录, 格式位ROW
+mysql开启binlog记录, 格式为ROW
 
 ### 安装启动说明
 
@@ -30,9 +30,9 @@ mysql开启binlog记录, 格式位ROW
 
 -   **data-target**:数据目标
 
--   **table-sync-job**:事件处理, 数组 
+-   **table-sync-job**:事件处理, 数组 (不配置的话整个库同步)
 
-    -    **keys**:更新,删除条件字段 
+    -    **primary-key**:更新,删除条件字段 
     -    **source**:数据来源库的表
     -    **target**:数据目标库的表
     -    **mapping**:字段映射. key:来源表字段名称, value:目标表字段名称
@@ -59,9 +59,7 @@ mysql开启binlog记录, 格式位ROW
   },
   "table-sync-job": [
     {
-      "keys": [
-        "id"
-      ],
+      "primary-key": "id",
       "source": "test_1",
       "target": "test_2"
     }
@@ -95,13 +93,34 @@ mysql开启binlog记录, 格式位ROW
         "name": "name_2",
         "age": "age_2"
       },
-      "keys": [
-        "id"
-      ],
+      "primary-key": "id",
       "source": "test_1",
       "target": "test_2"
     }
   ]
 }
 ````
+
+### 3:同步整个数据库 (认为两个库的表，字段一致)
+```json
+{
+  "log-name": null,
+  "log-position": null,
+  "data-source": {
+    "host": "127.0.0.1",
+    "database": "dbname",
+    "port": 3306,
+    "username": "root",
+    "password": "00000"
+  },
+  "data-target": {
+    "host": "127.0.0.1",
+    "database": "dbname",
+    "port": 3306,
+    "username": "root",
+    "password": "00000"
+  }
+}
+
+```
 
