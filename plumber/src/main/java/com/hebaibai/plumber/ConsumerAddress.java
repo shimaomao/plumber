@@ -2,6 +2,7 @@ package com.hebaibai.plumber;
 
 /**
  * 注册的事件
+ * @author hjx
  */
 public interface ConsumerAddress {
 

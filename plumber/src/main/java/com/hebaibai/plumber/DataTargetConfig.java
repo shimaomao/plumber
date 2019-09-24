@@ -3,6 +3,9 @@ package com.hebaibai.plumber;
 import io.vertx.core.json.JsonObject;
 import lombok.Data;
 
+/**
+ * @author hjx
+ */
 @Data
 public class DataTargetConfig {
 

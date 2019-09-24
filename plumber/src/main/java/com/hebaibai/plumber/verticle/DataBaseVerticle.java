@@ -5,22 +5,20 @@ import com.hebaibai.plumber.ConsumerAddress;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.logging.JULLogDelegateFactory;
-import io.vertx.core.spi.logging.LogDelegate;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hjx
  */
+@Slf4j
 @Setter
 public class DataBaseVerticle extends AbstractVerticle {
 
     private AsyncSQLClient sqlClient;
 
     public static final String DATA_BASE_POOL_NAME = "plumber_pool";
-
-    private static LogDelegate log = new JULLogDelegateFactory().createDelegate(DataBaseVerticle.class.getName());
 
     public DataBaseVerticle(AsyncSQLClient sqlClient) {
         this.sqlClient = sqlClient;
@@ -33,12 +31,10 @@ public class DataBaseVerticle extends AbstractVerticle {
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_INSERT, this::insert);
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_DELETE, this::delete);
         eventBus.consumer(ConsumerAddress.EXECUTE_SQL_UPDATE, this::update);
-        log.info("start DataBaseVerticle success");
     }
 
     @Override
     public void stop() throws Exception {
-        log.info("stop DataBaseVerticle success");
     }
 
     /**
@@ -48,8 +44,8 @@ public class DataBaseVerticle extends AbstractVerticle {
      */
     public void query(Message<String> message) {
         String sql = message.body();
+        log.info(sql);
         sqlClient.query(sql, res -> {
-            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getRows());
             } else {
@@ -67,8 +63,8 @@ public class DataBaseVerticle extends AbstractVerticle {
      */
     public void update(Message<String> message) {
         String sql = message.body();
+        log.info(sql);
         sqlClient.update(sql, res -> {
-            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {
@@ -86,8 +82,8 @@ public class DataBaseVerticle extends AbstractVerticle {
      */
     public void delete(Message<String> message) {
         String sql = message.body();
+        log.info(sql);
         sqlClient.update(sql, res -> {
-            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {
@@ -105,8 +101,8 @@ public class DataBaseVerticle extends AbstractVerticle {
      */
     public void insert(Message<String> message) {
         String sql = message.body();
+        log.info(sql);
         sqlClient.update(sql, res -> {
-            log.info(sql);
             if (res.succeeded()) {
                 message.reply(res.result().getUpdated());
             } else {

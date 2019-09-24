@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.util.Set;
 
+/**
+ * @author hjx
+ */
 @Data
 public class Config {
 

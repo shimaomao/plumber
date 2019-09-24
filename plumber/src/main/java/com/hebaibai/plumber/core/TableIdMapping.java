@@ -5,6 +5,7 @@ import java.util.Map;
 
 /**
  * 数据库元数据
+ * @author hjx
  */
 public class TableIdMapping {
 

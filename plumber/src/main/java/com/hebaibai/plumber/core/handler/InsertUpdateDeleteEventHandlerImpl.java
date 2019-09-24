@@ -18,6 +18,7 @@ import java.util.Set;
  *
  * @author hjx
  */
+@Slf4j
 public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     private List<AbstractEventHandler> eventHandlers = Arrays.asList(
@@ -104,5 +105,20 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
             return;
         }
         log.error("不支持的操作");
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for (int i = 0; i < this.eventHandlers.size(); i++) {
+            AbstractEventHandler abstractEventHandler = eventHandlers.get(i);
+            builder.append(abstractEventHandler.toString());
+            if (i != eventHandlers.size() - 1) {
+                builder.append(", ");
+            }
+        }
+        builder.append("]");
+        return builder.toString();
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
  *
  * @author hjx
  */
+@Slf4j
 public class DeleteEventHandlerImpl extends AbstractEventHandler implements EventHandler {
 
     @Override
@@ -31,7 +32,6 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
 
     @Override
     public void handle(EventBus eventBus, EventData data) {
-        log.info("new event delete ... ");
         String[] rows = EventDataUtils.getDeleteRows(data);
         List<String> columns = sourceTableMateData.getColumns();
         List<String> wheres = new ArrayList<>();

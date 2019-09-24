@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author hjx
  */
+@Slf4j
 public class PlumberLancher {
 
     @Getter
@@ -37,8 +38,6 @@ public class PlumberLancher {
     private boolean run = false;
 
     private List<String> verticleIds = new ArrayList<>();
-
-    private static LogDelegate log = new JULLogDelegateFactory().createDelegate(PlumberLancher.class.getName());
 
     /**
      * 启动

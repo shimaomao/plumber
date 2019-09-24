@@ -1,11 +1,13 @@
 package com.hebaibai.plumber.core.handler;
 
-import com.hebaibai.plumber.Main;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.logging.JULLogDelegateFactory;
 import io.vertx.core.spi.logging.LogDelegate;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,9 +16,8 @@ import java.util.Set;
  *
  * @author hjx
  */
+@Slf4j
 public abstract class AbstractEventHandler implements EventHandler {
-
-    static protected LogDelegate log = new JULLogDelegateFactory().createDelegate(AbstractEventHandler.class.getName());
 
     protected String targetDatabase;
 
@@ -65,4 +66,17 @@ public abstract class AbstractEventHandler implements EventHandler {
         this.keys = keys;
     }
 
+    @Override
+    public String toString() {
+        Map map = new HashMap() {{
+            put("name", getClass().getSimpleName());
+            put("targetDatabase", targetDatabase);
+            put("targetTable", targetTable);
+            put("sourceDatabase", sourceDatabase);
+            put("sourceTable", sourceTable);
+            put("keys", keys);
+            put("mapping", mapping);
+        }};
+        return JSONObject.toJSONString(map);
+    }
 }
