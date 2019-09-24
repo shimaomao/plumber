@@ -8,6 +8,7 @@ import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.cli.*;
 import org.apache.commons.dbutils.QueryRunner;
@@ -90,19 +91,18 @@ public class Main {
      */
     private static Connection dataTargetConn;
 
-
+    /**
+     * 入口
+     *
+     * @param args
+     * @throws SQLException
+     * @throws ParseException
+     * @throws IOException
+     */
     public static void main(String[] args) throws SQLException, ParseException, IOException {
         log.info("Main start ... ");
         config = new Config();
         JSONObject configJson = getConf(args);
-
-        //binlog name position
-        if (configJson.containsKey(LOG_NAME)) {
-            config.setLogName(configJson.getString(LOG_NAME));
-        }
-        if (configJson.containsKey(LOG_POSITION)) {
-            config.setPosition(configJson.getLong(LOG_POSITION));
-        }
 
         //数据源配置
         DataSourceConfig dataSource = configJson.getObject(DATA_SOURCE, DataSourceConfig.class);
@@ -118,6 +118,14 @@ public class Main {
         dataTargetConn = getConnection(
                 dataTarget.getHost(), dataTarget.getPort(), dataTarget.getUsername(), dataTarget.getPassword());
 
+        //binlog name position
+        if (configJson.containsKey(LOG_NAME)) {
+            config.setLogName(configJson.getString(LOG_NAME));
+        }
+        if (configJson.containsKey(LOG_POSITION)) {
+            config.setPosition(configJson.getLong(LOG_POSITION));
+        }
+
         //加载配置
         eventHandler(configJson);
 
@@ -126,10 +134,7 @@ public class Main {
             log.debug("init EventHandler: {}", handler);
         }
 
-        dataSourceConn.close();
-
-        dataTargetConn.close();
-
+        //启动
         PlumberLancher plumberLancher = new PlumberLancher();
         Vertx vertx = Vertx.vertx();
         Context context = vertx.getOrCreateContext();
@@ -137,6 +142,7 @@ public class Main {
         plumberLancher.setContext(context);
         plumberLancher.start(config);
         log.info("Main start success ...");
+
     }
 
     /**
@@ -160,7 +166,7 @@ public class Main {
         }
         //没有配置TABLE_SYNC_JOB节点, 默认两库数中的表，结构完全一样，直接全库同步
         DataSourceConfig sourceConfig = config.getDataSourceConfig();
-        List<String> tables = getTables(dataSourceConn, sourceConfig.getDatabase());
+        List<String> tables = tables(dataSourceConn, sourceConfig.getDatabase());
         for (String table : tables) {
             EventHandler eventHandler = eventHandlerByTable(table);
             eventHandlers.add(eventHandler);
@@ -341,7 +347,7 @@ public class Main {
      * @return
      * @throws SQLException
      */
-    private static List<String> getTables(Connection connection, String database) throws SQLException {
+    private static List<String> tables(Connection connection, String database) throws SQLException {
         String sql = "select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA = '" + database + "';";
         List<String> list = new ArrayList<>();
         List<Map<String, Object>> maps = new QueryRunner().query(connection, sql, new MapListHandler());
@@ -350,4 +356,33 @@ public class Main {
         }
         return list;
     }
+
+    /**
+     * 获取binlogs
+     *
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
+    private static List<BinaryLog> binlogs(Connection connection) throws SQLException {
+        String sql = "show binary logs;";
+        List<BinaryLog> binlogs = new ArrayList<>();
+        List<Map<String, Object>> maps = new QueryRunner().query(connection, sql, new MapListHandler());
+        for (Map<String, Object> binlog : maps) {
+            String logName = binlog.get("Log_name").toString();
+            long fileSize = Long.valueOf(binlog.get("File_size").toString());
+            BinaryLog binaryLogs = new BinaryLog();
+            binaryLogs.setLogName(logName);
+            binaryLogs.setFileSize(fileSize);
+            binlogs.add(binaryLogs);
+        }
+        return binlogs;
+    }
+
+    @Data
+    static class BinaryLog {
+        String logName;
+        long fileSize;
+    }
+
 }

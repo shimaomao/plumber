@@ -45,7 +45,7 @@ public class PlumberLancher {
     public void start(Config config) {
         DataTargetConfig dataTargetConfig = config.getDataTargetConfig();
         JsonObject json = dataTargetConfig.getJson();
-        log.info("sql client :{}", json);
+        log.debug("sql client :{}", json);
         sqlClient = MySQLClient.createShared(vertx, json, "plumber_pool:" + dataTargetConfig.getHost());
 
         DataBaseVerticle dataBaseVerticle = new DataBaseVerticle(sqlClient);

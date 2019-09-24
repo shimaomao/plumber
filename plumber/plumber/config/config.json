@@ -1,0 +1,16 @@
+{
+  "data-source": {
+    "host": "127.0.0.1",
+    "database": "textdb_1",
+    "port": 3306,
+    "username": "root",
+    "password": "root"
+  },
+  "data-target": {
+    "host": "127.0.0.1",
+    "database": "textdb_2",
+    "port": 3306,
+    "username": "root",
+    "password": "root"
+  }
+}
