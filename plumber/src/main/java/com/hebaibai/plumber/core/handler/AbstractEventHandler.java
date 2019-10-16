@@ -1,11 +1,9 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
-import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
+import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
-import io.vertx.core.logging.JULLogDelegateFactory;
-import io.vertx.core.spi.logging.LogDelegate;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -36,7 +34,7 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected String key;
 
-    protected List<EventPlugin> eventPlugins = new ArrayList<>();
+    protected List<SqlEventDataExecuter> eventPlugins = new ArrayList<>();
 
     @Override
     public void setSource(TableMateData tableMateData) {
@@ -68,7 +66,7 @@ public abstract class AbstractEventHandler implements EventHandler {
     }
 
     @Override
-    public void addPlugin(EventPlugin eventPlugin) {
+    public void addPlugin(SqlEventDataExecuter eventPlugin) {
         if (eventPlugin == null) {
             return;
         }

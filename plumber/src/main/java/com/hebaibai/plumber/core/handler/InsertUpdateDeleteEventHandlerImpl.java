@@ -3,7 +3,8 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
-import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
+import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.eventbus.EventBus;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * 增删改事件综合和处理器
@@ -109,7 +109,7 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
     }
 
     @Override
-    public void addPlugin(EventPlugin eventPlugin) {
+    public void addPlugin(SqlEventDataExecuter eventPlugin) {
         for (AbstractEventHandler eventHandler : eventHandlers) {
             eventHandler.addPlugin(eventPlugin);
         }

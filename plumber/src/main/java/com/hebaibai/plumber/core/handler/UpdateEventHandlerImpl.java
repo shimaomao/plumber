@@ -4,8 +4,9 @@ import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.ConsumerAddress;
-import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
-import com.hebaibai.plumber.core.handler.plugin.EventPluginData;
+import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.SqlEventData;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +74,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
             return;
         }
         //填充插件数据
-        EventPluginData eventPluginData = new EventPluginData(EventPluginData.TYPE_UPDATE);
+        SqlEventData eventPluginData = new SqlEventData(SqlEventData.TYPE_UPDATE);
         //添加变动前的数据
         eventPluginData.setBefor(eventBeforData);
         //添加变动后的数据
@@ -83,9 +84,9 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         eventPluginData.setTargetDatabase(this.targetDatabase);
         eventPluginData.setTargetTable(this.targetTable);
         eventPluginData.setKey(mapping.get(this.key));
-        for (EventPlugin eventPlugin : eventPlugins) {
+        for (SqlEventDataExecuter eventPlugin : eventPlugins) {
             try {
-                eventPlugin.doWithPlugin(eventPluginData);
+                eventPlugin.execute(eventBus, eventPluginData);
             } catch (Exception e) {
                 log.error(eventPlugin.getClass().getName(), e);
             }

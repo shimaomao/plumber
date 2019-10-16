@@ -5,10 +5,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.hebaibai.plumber.config.Config;
 import com.hebaibai.plumber.config.DataSourceConfig;
 import com.hebaibai.plumber.config.DataTargetConfig;
-import com.hebaibai.plumber.core.handler.EventHandler;
+import com.hebaibai.plumber.core.EventHandler;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
-import com.hebaibai.plumber.core.handler.plugin.DefaultEventPlugin;
-import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
+import com.hebaibai.plumber.core.executer.MysqlEventExecuter;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import io.vertx.core.Context;
@@ -161,19 +161,19 @@ public class Main {
      */
     private static void eventPlugins(JSONObject configJson) throws IllegalAccessException, InstantiationException {
         JSONObject pluginJson = configJson.getJSONObject("plugin");
-        List<EventPlugin> eventPlugins = new ArrayList<>();
+        List<SqlEventDataExecuter> eventPlugins = new ArrayList<>();
         if (pluginJson != null) {
             for (Map.Entry<String, Object> entry : pluginJson.entrySet()) {
                 String pluginName = entry.getKey();
                 JSONObject jsonObject = pluginJson.getJSONObject(pluginName);
-                Class<? extends EventPlugin> eventPluginClass = EventPlugin.EVENT_PLUGIN_MAP.getOrDefault(pluginName, DefaultEventPlugin.class);
-                EventPlugin eventPlugin = eventPluginClass.newInstance();
+                Class<? extends SqlEventDataExecuter> eventPluginClass = SqlEventDataExecuter.EVENT_PLUGIN_MAP.getOrDefault(pluginName, MysqlEventExecuter.class);
+                SqlEventDataExecuter eventPlugin = eventPluginClass.newInstance();
                 eventPlugin.setConfig(jsonObject);
                 eventPlugins.add(eventPlugin);
             }
         }
         for (EventHandler handler : config.getEventHandlers()) {
-            for (EventPlugin eventPlugin : eventPlugins) {
+            for (SqlEventDataExecuter eventPlugin : eventPlugins) {
                 handler.addPlugin(eventPlugin);
             }
         }

@@ -1,6 +1,6 @@
 package com.hebaibai.plumber.config;
 
-import com.hebaibai.plumber.core.handler.EventHandler;
+import com.hebaibai.plumber.core.EventHandler;
 import lombok.Data;
 
 import java.util.Set;

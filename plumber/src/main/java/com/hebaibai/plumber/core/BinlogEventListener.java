@@ -2,7 +2,7 @@ package com.hebaibai.plumber.core;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.*;
-import com.hebaibai.plumber.core.handler.EventHandler;
+import com.hebaibai.plumber.core.EventHandler;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.Getter;

@@ -1,21 +1,22 @@
-package com.hebaibai.plumber.core.handler.plugin;
+package com.hebaibai.plumber.core;
 
 import lombok.Data;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
+ * 数据库事件中的数据
+ *
  * @author hjx
  */
 @Data
-public class EventPluginData {
+public class SqlEventData {
 
     public static final String TYPE_INSERT = "TYPE_INSERT";
     public static final String TYPE_UPDATE = "TYPE_UPDATE";
     public static final String TYPE_DELETE = "TYPE_DELETE";
 
-    public EventPluginData(String type) {
+    public SqlEventData(String type) {
         this.type = type;
     }
 
