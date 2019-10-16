@@ -4,13 +4,14 @@ import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.ConsumerAddress;
+import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
+import com.hebaibai.plumber.core.handler.plugin.EventPluginData;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
+import sun.nio.cs.ext.MacArabic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 更新事件处理器
@@ -39,6 +40,8 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         List<String> columns = sourceTableMateData.getColumns();
         List<String> updateColumns = new ArrayList<>();
         List<String> updateKeyColumns = new ArrayList<>();
+        Map<String, String> eventAfterData = new HashMap<>();
+
         for (int i = 0; i < columns.size(); i++) {
             String sourceName = columns.get(i);
             //是否是key
@@ -60,12 +63,27 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
             } else {
                 updateColumns.add("`" + targetName + "` = '" + after[i] + "'");
             }
+            //设置更新后的数据
+            eventAfterData.put(targetName, after[i]);
         }
-
         if (updateColumns.size() == 0) {
             return;
         }
-
+        //填充插件数据
+        EventPluginData eventPluginData = new EventPluginData();
+        eventPluginData.setAfterData(eventAfterData);
+        eventPluginData.setSourceDatabase(this.sourceDatabase);
+        eventPluginData.setSourceTable(this.sourceTable);
+        eventPluginData.setTargetDatabase(this.targetDatabase);
+        eventPluginData.setTargetTable(this.targetTable);
+        eventPluginData.setKeys(this.keys);
+        for (EventPlugin eventPlugin : eventPlugins) {
+            try {
+                eventPlugin.doWithPlugin(EventPlugin.TYPE_UPDATE, eventPluginData);
+            } catch (Exception e) {
+                log.error(eventPlugin.getClass().getName(), e);
+            }
+        }
         //拼装sql
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("UPDATE ").append(targetDatabase).append(".").append(targetTable).append(" SET ");

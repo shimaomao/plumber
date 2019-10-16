@@ -2,14 +2,13 @@ package com.hebaibai.plumber.core.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.logging.JULLogDelegateFactory;
 import io.vertx.core.spi.logging.LogDelegate;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 公用默认实现
@@ -36,6 +35,8 @@ public abstract class AbstractEventHandler implements EventHandler {
     protected Map<String, String> mapping;
 
     protected Set<String> keys;
+
+    protected List<EventPlugin> eventPlugins = new ArrayList<>();
 
     @Override
     public void setSource(TableMateData tableMateData) {
@@ -64,6 +65,14 @@ public abstract class AbstractEventHandler implements EventHandler {
     @Override
     public void setKeys(Set<String> keys) {
         this.keys = keys;
+    }
+
+    @Override
+    public void addPlugin(EventPlugin eventPlugin) {
+        if (eventPlugin == null) {
+            return;
+        }
+        this.eventPlugins.add(eventPlugin);
     }
 
     @Override

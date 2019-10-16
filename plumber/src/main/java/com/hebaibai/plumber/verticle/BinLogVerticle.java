@@ -2,7 +2,7 @@ package com.hebaibai.plumber.verticle;
 
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
 import com.github.shyiko.mysql.binlog.event.deserialization.EventDeserializer;
-import com.hebaibai.plumber.Config;
+import com.hebaibai.plumber.config.Config;
 import com.hebaibai.plumber.core.BinlogEventListener;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.logging.Logger;

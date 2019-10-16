@@ -3,6 +3,7 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
+import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.eventbus.EventBus;
@@ -105,6 +106,13 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
             return;
         }
         log.error("不支持的操作");
+    }
+
+    @Override
+    public void addPlugin(EventPlugin eventPlugin) {
+        for (AbstractEventHandler eventHandler : eventHandlers) {
+            eventHandler.addPlugin(eventPlugin);
+        }
     }
 
     @Override

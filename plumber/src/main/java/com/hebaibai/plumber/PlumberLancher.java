@@ -1,12 +1,12 @@
 package com.hebaibai.plumber;
 
+import com.hebaibai.plumber.config.Config;
+import com.hebaibai.plumber.config.DataTargetConfig;
 import com.hebaibai.plumber.verticle.BinLogVerticle;
 import com.hebaibai.plumber.verticle.DataBaseVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.JULLogDelegateFactory;
-import io.vertx.core.spi.logging.LogDelegate;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.MySQLClient;
 import lombok.Getter;

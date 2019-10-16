@@ -4,6 +4,8 @@ import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.ConsumerAddress;
+import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
+import com.hebaibai.plumber.core.handler.plugin.EventPluginData;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,20 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
                 wheres.add(targetName + " = null ");
             } else {
                 wheres.add("`" + targetName + "`" + " = '" + rows[i] + "' ");
+            }
+        }
+        //填充插件数据
+        EventPluginData eventPluginData = new EventPluginData();
+        eventPluginData.setSourceDatabase(this.sourceDatabase);
+        eventPluginData.setSourceTable(this.sourceTable);
+        eventPluginData.setTargetDatabase(this.targetDatabase);
+        eventPluginData.setTargetTable(this.targetTable);
+        eventPluginData.setKeys(this.keys);
+        for (EventPlugin eventPlugin : eventPlugins) {
+            try {
+                eventPlugin.doWithPlugin(EventPlugin.TYPE_DELETE, eventPluginData);
+            } catch (Exception e) {
+                log.error(eventPlugin.getClass().getName(), e);
             }
         }
         StringBuilder sqlBuilder = new StringBuilder();

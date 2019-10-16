@@ -2,8 +2,13 @@ package com.hebaibai.plumber;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.hebaibai.plumber.config.Config;
+import com.hebaibai.plumber.config.DataSourceConfig;
+import com.hebaibai.plumber.config.DataTargetConfig;
 import com.hebaibai.plumber.core.handler.EventHandler;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
+import com.hebaibai.plumber.core.handler.plugin.DefaultEventPlugin;
+import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import io.vertx.core.Context;
@@ -99,7 +104,7 @@ public class Main {
      * @throws ParseException
      * @throws IOException
      */
-    public static void main(String[] args) throws SQLException, ParseException, IOException {
+    public static void main(String[] args) throws SQLException, ParseException, IOException, InstantiationException, IllegalAccessException {
         log.info("Main start ... ");
         config = new Config();
         JSONObject configJson = getConf(args);
@@ -129,8 +134,11 @@ public class Main {
         //加载配置
         eventHandler(configJson);
 
-        //打印日志
+        //加载插件
+        eventPlugins(configJson);
+
         for (EventHandler handler : config.getEventHandlers()) {
+            //打印日志
             log.debug("init EventHandler: {}", handler);
         }
 
@@ -143,6 +151,32 @@ public class Main {
         plumberLancher.start(config);
         log.info("Main start success ...");
 
+    }
+
+    /**
+     * 加载插件
+     *
+     * @param configJson
+     * @return
+     */
+    private static void eventPlugins(JSONObject configJson) throws IllegalAccessException, InstantiationException {
+        JSONObject pluginJson = configJson.getJSONObject("plugin");
+        List<EventPlugin> eventPlugins = new ArrayList<>();
+        if (pluginJson != null) {
+            for (Map.Entry<String, Object> entry : pluginJson.entrySet()) {
+                String pluginName = entry.getKey();
+                JSONObject jsonObject = pluginJson.getJSONObject(pluginName);
+                Class<? extends EventPlugin> eventPluginClass = EventPlugin.EVENT_PLUGIN_MAP.getOrDefault(pluginName, DefaultEventPlugin.class);
+                EventPlugin eventPlugin = eventPluginClass.newInstance();
+                eventPlugin.setConfig(jsonObject);
+                eventPlugins.add(eventPlugin);
+            }
+        }
+        for (EventHandler handler : config.getEventHandlers()) {
+            for (EventPlugin eventPlugin : eventPlugins) {
+                handler.addPlugin(eventPlugin);
+            }
+        }
     }
 
     /**
@@ -211,7 +245,6 @@ public class Main {
         }
         keys.add(id);
         eventHandler.setKeys(keys);
-
         return eventHandler;
     }
 
@@ -272,7 +305,6 @@ public class Main {
             }
             keys.add(id);
         }
-
         return eventHandler;
     }
 

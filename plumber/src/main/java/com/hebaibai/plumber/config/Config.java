@@ -1,4 +1,4 @@
-package com.hebaibai.plumber;
+package com.hebaibai.plumber.config;
 
 import com.hebaibai.plumber.core.handler.EventHandler;
 import lombok.Data;

@@ -2,6 +2,7 @@ package com.hebaibai.plumber.core.handler;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
+import com.hebaibai.plumber.core.handler.plugin.EventPlugin;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.eventbus.EventBus;
 
@@ -15,6 +16,10 @@ import java.util.Set;
  */
 public interface EventHandler {
 
+    /**
+     * 添加事件处理插件
+     */
+    void addPlugin(EventPlugin eventPlugin);
 
     /**
      * 设置目标数据源
