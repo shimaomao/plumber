@@ -34,7 +34,7 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected Map<String, String> mapping;
 
-    protected Set<String> keys;
+    protected String key;
 
     protected List<EventPlugin> eventPlugins = new ArrayList<>();
 
@@ -63,8 +63,8 @@ public abstract class AbstractEventHandler implements EventHandler {
     }
 
     @Override
-    public void setKeys(Set<String> keys) {
-        this.keys = keys;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     @Override
@@ -83,7 +83,7 @@ public abstract class AbstractEventHandler implements EventHandler {
             put("targetTable", targetTable);
             put("sourceDatabase", sourceDatabase);
             put("sourceTable", sourceTable);
-            put("keys", keys);
+            put("key", key);
             put("mapping", mapping);
         }};
         return JSONObject.toJSONString(map);

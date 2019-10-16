@@ -12,7 +12,8 @@ public class DefaultEventPlugin implements EventPlugin {
     }
 
     @Override
-    public void doWithPlugin(String type, EventPluginData eventPluginData) throws Exception {
-        System.out.println("");
+    public void doWithPlugin(EventPluginData eventPluginData) throws Exception {
+        System.err.println(eventPluginData.getBefor());
+        System.err.println(eventPluginData.getAfter());
     }
 }

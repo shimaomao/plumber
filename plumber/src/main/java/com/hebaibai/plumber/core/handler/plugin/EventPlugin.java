@@ -12,10 +12,6 @@ import java.util.Map;
  */
 public interface EventPlugin {
 
-    String TYPE_INSERT = "TYPE_INSERT";
-    String TYPE_UPDATE = "TYPE_UPDATE";
-    String TYPE_DELETE = "TYPE_DELETE";
-
     /**
      * 现有的插件
      */
@@ -36,6 +32,6 @@ public interface EventPlugin {
      *
      * @return
      */
-    void doWithPlugin(String type, EventPluginData eventPluginData) throws Exception;
+    void doWithPlugin(EventPluginData eventPluginData) throws Exception;
 
 }

@@ -62,16 +62,17 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
 
         }
         //填充插件数据
-        EventPluginData eventPluginData = new EventPluginData();
-        eventPluginData.setAfterData(eventAfterData);
+        EventPluginData eventPluginData = new EventPluginData(EventPluginData.TYPE_INSERT);
+        //添加变动后的数据
+        eventPluginData.setAfter(eventAfterData);
         eventPluginData.setSourceDatabase(this.sourceDatabase);
         eventPluginData.setSourceTable(this.sourceTable);
         eventPluginData.setTargetDatabase(this.targetDatabase);
         eventPluginData.setTargetTable(this.targetTable);
-        eventPluginData.setKeys(this.keys);
+        eventPluginData.setKey(mapping.get(this.key));
         for (EventPlugin eventPlugin : eventPlugins) {
             try {
-                eventPlugin.doWithPlugin(EventPlugin.TYPE_INSERT, eventPluginData);
+                eventPlugin.doWithPlugin(eventPluginData);
             } catch (Exception e) {
                 log.error(eventPlugin.getClass().getName(), e);
             }

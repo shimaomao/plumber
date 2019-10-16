@@ -238,13 +238,11 @@ public class Main {
         eventHandler.setMapping(map);
 
         //id
-        Set<String> keys = new HashSet<>();
         String id = source.getId();
         if (id == null || id.length() == 0) {
             throw new RuntimeException(table + " primary key not find");
         }
-        keys.add(id);
-        eventHandler.setKeys(keys);
+        eventHandler.setKey(id);
         return eventHandler;
     }
 
@@ -292,18 +290,16 @@ public class Main {
             }
         }
         //id如果有配置，按照配置
-        Set<String> keys = new HashSet<>();
-        eventHandler.setKeys(keys);
         if (eventHandlerJson.containsKey(PRIMARY_KEY)) {
             String id = eventHandlerJson.getString(PRIMARY_KEY);
-            keys.add(id);
+            eventHandler.setKey(id);
         } else {
             //数据来源表中的主键
             String id = targetMateData.getId();
             if (id == null || id.length() == 0) {
                 throw new RuntimeException(targetMateData.getNama() + " primary key not find");
             }
-            keys.add(id);
+            eventHandler.setKey(id);
         }
         return eventHandler;
     }
