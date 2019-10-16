@@ -18,7 +18,7 @@ LIB_DIR=$DEPLOY_DIR/lib
 LIB_JARS=`ls $LIB_DIR|grep .jar|awk '{print "'$LIB_DIR'/"$0}'|tr "\n" ":"`
 
 # 判断是否已经启动
-PID=`ps -ef | grep "$DEPLOY_DIR" | grep -v 'grep' | awk '{print $2}'`
+PID=`ps -ef | grep java | grep "$DEPLOY_DIR" | grep -v grep | awk '{print $2}'`
 
 if [ -n "$PID" ]; then
     echo "已经启动"
