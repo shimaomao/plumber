@@ -8,7 +8,6 @@
   },
   "data-target": [
     {
-      "type": "mysql",
       "host": "127.0.0.1",
       "database": "textdb_2",
       "port": 3306,
@@ -16,6 +15,10 @@
       "password": "root"
     }
   ],
+  "executer": {
+    "MysqlEventExecuter": {
+    }
+  },
   "table-sync-job": [
     {
       "mapping": {

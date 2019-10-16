@@ -7,7 +7,6 @@ import com.hebaibai.plumber.config.DataSourceConfig;
 import com.hebaibai.plumber.config.DataTargetConfig;
 import com.hebaibai.plumber.core.EventHandler;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
-import com.hebaibai.plumber.core.executer.MysqlEventExecuter;
 import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
@@ -139,8 +138,8 @@ public class Main {
         //加载配置
         eventHandler(configJson);
 
-        //加载插件
-        eventPlugins(configJson);
+        //加载数据持久化工具
+        eventDataExecuters(configJson);
 
         for (EventHandler handler : config.getEventHandlers()) {
             //打印日志
@@ -159,12 +158,12 @@ public class Main {
     }
 
     /**
-     * 加载插件
+     * 加载数据持久化工具
      *
      * @param configJson
      * @return
      */
-    private static void eventPlugins(JSONObject configJson) throws IllegalAccessException, InstantiationException {
+    private static void eventDataExecuters(JSONObject configJson) throws IllegalAccessException, InstantiationException {
         JSONObject pluginJson = configJson.getJSONObject(EXECUTER);
         List<SqlEventDataExecuter> eventDataExecuters = new ArrayList<>();
         if (pluginJson != null) {

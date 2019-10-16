@@ -28,13 +28,11 @@ mysql开启binlog记录, 格式为ROW
 ### 节点说明:
 
 -   **log-name**:binlog 名称(默认为最新文件)
-
 -   **log-position**:binlog 开始位置(默认为后位置)
-
 -   **data-source**:数据来源
-
 -   **data-target**:数据目标
-
+-   **executer**:数据持久化执行工具配置, **目前只支持mysql**, 后续添加更多
+    -   **MysqlEventExecuter**: mysql的持久化工具
 -   **table-sync-job**:事件处理, 数组 (不配置的话整个库同步)
 
     -    **primary-key**:更新,删除条件字段 
@@ -46,86 +44,100 @@ mysql开启binlog记录, 格式为ROW
 
 ```json
 {
-  "log-name": null,
-  "log-position": null,
-  "data-source": {
-    "host": "127.0.0.1",
-    "database": "dbname",
-    "port": 3306,
-    "username": "root",
-    "password": "00000"
-  },
-  "data-target": {
-    "host": "127.0.0.1",
-    "database": "dbname",
-    "port": 3306,
-    "username": "root",
-    "password": "00000"
-  },
-  "table-sync-job": [
-    {
-      "primary-key": "id",
-      "source": "test_1",
-      "target": "test_2"
-    }
-  ]
+    "log-name":null,
+    "log-position":null,
+    "data-source":{
+        "host":"127.0.0.1",
+        "database":"dbname",
+        "port":3306,
+        "username":"root",
+        "password":"00000"
+    },
+    "data-target":{
+        "host":"127.0.0.1",
+        "database":"dbname",
+        "port":3306,
+        "username":"root",
+        "password":"00000"
+    },
+    "executer":{
+        "MysqlEventExecuter":{
+
+        }
+    },
+    "table-sync-job":[
+        {
+            "primary-key":"id",
+            "source":"test_1",
+            "target":"test_2"
+        }
+    ]
 }
 ```
 
 ### 2:转换同步数据 ( 转换表名,字段名  )
 ````json
 {
-  "log-name": null,
-  "log-position": null,
-  "data-source": {
-    "host": "127.0.0.1",
-    "database": "dbname",
-    "port": 3306,
-    "username": "root",
-    "password": "00000"
-  },
-  "data-target": {
-    "host": "127.0.0.1",
-    "database": "dbname",
-    "port": 3306,
-    "username": "root",
-    "password": "00000"
-  },
-  "table-sync-job": [
-    {
-      "mapping": {
-        "id": "id_2",
-        "name": "name_2",
-        "age": "age_2"
-      },
-      "primary-key": "id",
-      "source": "test_1",
-      "target": "test_2"
-    }
-  ]
+    "log-name":null,
+    "log-position":null,
+    "data-source":{
+        "host":"127.0.0.1",
+        "database":"dbname",
+        "port":3306,
+        "username":"root",
+        "password":"00000"
+    },
+    "data-target":{
+        "host":"127.0.0.1",
+        "database":"dbname",
+        "port":3306,
+        "username":"root",
+        "password":"00000"
+    },
+    "executer":{
+        "MysqlEventExecuter":{
+
+        }
+    },
+    "table-sync-job":[
+        {
+            "mapping":{
+                "id":"id_2",
+                "name":"name_2",
+                "age":"age_2"
+            },
+            "primary-key":"id",
+            "source":"test_1",
+            "target":"test_2"
+        }
+    ]
 }
 ````
 
 ### 3:同步整个数据库 (认为两个库的表，字段一致)
 ```json
 {
-  "log-name": null,
-  "log-position": null,
-  "data-source": {
-    "host": "127.0.0.1",
-    "database": "dbname",
-    "port": 3306,
-    "username": "root",
-    "password": "00000"
-  },
-  "data-target": {
-    "host": "127.0.0.1",
-    "database": "dbname",
-    "port": 3306,
-    "username": "root",
-    "password": "00000"
-  }
-}
+    "log-name":null,
+    "log-position":null,
+    "data-source":{
+        "host":"127.0.0.1",
+        "database":"dbname",
+        "port":3306,
+        "username":"root",
+        "password":"00000"
+    },
+    "data-target":{
+        "host":"127.0.0.1",
+        "database":"dbname",
+        "port":3306,
+        "username":"root",
+        "password":"00000"
+    },
+    "executer":{
+        "MysqlEventExecuter":{
 
+        }
+    }
+}
 ```
 
