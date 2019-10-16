@@ -65,7 +65,7 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         eventPluginData.setKey(mapping.get(this.key));
         for (SqlEventDataExecuter eventPlugin : eventPlugins) {
             try {
-                eventPlugin.execute(eventBus, eventPluginData);
+                eventPlugin.execute(eventPluginData);
             } catch (Exception e) {
                 log.error(eventPlugin.getClass().getName(), e);
             }

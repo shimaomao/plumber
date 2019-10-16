@@ -166,19 +166,26 @@ public class Main {
      */
     private static void eventPlugins(JSONObject configJson) throws IllegalAccessException, InstantiationException {
         JSONObject pluginJson = configJson.getJSONObject(EXECUTER);
-        List<SqlEventDataExecuter> eventPlugins = new ArrayList<>();
+        List<SqlEventDataExecuter> eventDataExecuters = new ArrayList<>();
         if (pluginJson != null) {
             for (Map.Entry<String, Object> entry : pluginJson.entrySet()) {
                 String pluginName = entry.getKey();
                 JSONObject jsonObject = pluginJson.getJSONObject(pluginName);
-                Class<? extends SqlEventDataExecuter> eventPluginClass = SqlEventDataExecuter.EVENT_PLUGIN_MAP.getOrDefault(pluginName, MysqlEventExecuter.class);
-                SqlEventDataExecuter eventPlugin = eventPluginClass.newInstance();
+                Class<? extends SqlEventDataExecuter> eventDataExecuterClass = SqlEventDataExecuter.EVENT_PLUGIN_MAP.get(pluginName);
+                if (eventDataExecuterClass == null) {
+                    throw new RuntimeException("executer not find");
+                }
+                SqlEventDataExecuter eventPlugin = eventDataExecuterClass.newInstance();
                 eventPlugin.setConfig(jsonObject);
-                eventPlugins.add(eventPlugin);
+                eventDataExecuters.add(eventPlugin);
             }
         }
+        if (eventDataExecuters.size() == 0) {
+            throw new RuntimeException("executer not find");
+        }
+        config.setSqlEventDataExecuters(eventDataExecuters);
         for (EventHandler handler : config.getEventHandlers()) {
-            for (SqlEventDataExecuter eventPlugin : eventPlugins) {
+            for (SqlEventDataExecuter eventPlugin : eventDataExecuters) {
                 handler.addPlugin(eventPlugin);
             }
         }

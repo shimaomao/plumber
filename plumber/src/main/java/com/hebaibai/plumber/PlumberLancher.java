@@ -1,14 +1,10 @@
 package com.hebaibai.plumber;
 
 import com.hebaibai.plumber.config.Config;
-import com.hebaibai.plumber.config.DataTargetConfig;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.verticle.BinLogVerticle;
-import com.hebaibai.plumber.verticle.DataBaseVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.asyncsql.AsyncSQLClient;
-import io.vertx.ext.asyncsql.MySQLClient;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +28,6 @@ public class PlumberLancher {
     @Getter
     private Context context;
 
-    private AsyncSQLClient sqlClient;
-
     @Getter
     private boolean run = false;
 
@@ -43,21 +37,10 @@ public class PlumberLancher {
      * 启动
      */
     public void start(Config config) {
-        DataTargetConfig dataTargetConfig = config.getDataTargetConfig();
-        JsonObject json = dataTargetConfig.getJson();
-        log.debug("sql client :{}", json);
-        sqlClient = MySQLClient.createShared(vertx, json, "plumber_pool:" + dataTargetConfig.getHost());
-
-        DataBaseVerticle dataBaseVerticle = new DataBaseVerticle(sqlClient);
-        dataBaseVerticle.init(vertx, context);
-        vertx.deployVerticle(dataBaseVerticle, res -> {
-            if (res.succeeded()) {
-                String id = res.result();
-                verticleIds.add(id);
-                log.info("DataBaseVerticle {} 部署成功", id);
-            }
-        });
-
+        //初始化Executer
+        for (SqlEventDataExecuter sqlEventDataExecuter : config.getSqlEventDataExecuters()) {
+            sqlEventDataExecuter.init(vertx, config);
+        }
         BinLogVerticle binLogVerticle = new BinLogVerticle(config);
         binLogVerticle.init(vertx, context);
         vertx.deployVerticle(binLogVerticle, res -> {
@@ -78,13 +61,6 @@ public class PlumberLancher {
                 }
             });
         }
-        sqlClient.close(res -> {
-            if (res.succeeded()) {
-                log.info("stop AsyncSQLClient success");
-            } else {
-                log.info("stop AsyncSQLClient error");
-            }
-        });
         run = false;
     }
 

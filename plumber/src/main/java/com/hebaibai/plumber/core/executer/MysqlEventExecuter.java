@@ -2,9 +2,17 @@ package com.hebaibai.plumber.core.executer;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hebaibai.plumber.ConsumerAddress;
+import com.hebaibai.plumber.config.Config;
+import com.hebaibai.plumber.config.DataTargetConfig;
 import com.hebaibai.plumber.core.SqlEventData;
 import com.hebaibai.plumber.core.SqlEventDataExecuter;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.asyncsql.AsyncSQLClient;
+import io.vertx.ext.asyncsql.MySQLClient;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,18 +20,33 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 执行 mysql
+ * 执行 mysql sql
  *
  * @author hjx
  */
+@Slf4j
 public class MysqlEventExecuter implements SqlEventDataExecuter {
+
+    /**
+     * 异步的数据库操作客户端
+     */
+    private AsyncSQLClient sqlClient;
+
+    @Override
+    public void init(Vertx vertx, Config config) {
+        DataTargetConfig dataTargetConfig = config.getDataTargetConfig();
+        JsonObject json = dataTargetConfig.getJson();
+        log.debug("sql client :{}", json);
+        sqlClient = MySQLClient.createShared(vertx, json, "plumber_pool:" + dataTargetConfig.getHost());
+    }
+
     @Override
     public void setConfig(JSONObject config) {
 
     }
 
     @Override
-    public void execute(EventBus eventBus, SqlEventData sqlEventData) throws Exception {
+    public void execute(SqlEventData sqlEventData) throws Exception {
         String type = sqlEventData.getType();
         //拼装sql
         StringBuilder sqlBuilder = new StringBuilder();
@@ -48,7 +71,7 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
                 sqlBuilder.append(" ( ").append(String.join(", ", columns));
                 sqlBuilder.append(" ) VALUES ( ").append(String.join(", ", columnValues));
                 sqlBuilder.append(");");
-                eventBus.send(ConsumerAddress.EXECUTE_SQL_INSERT, sqlBuilder.toString());
+                insert(sqlBuilder.toString());
                 break;
 
             //delete
@@ -71,7 +94,7 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
                 sqlBuilder.append(sqlEventData.getTargetDatabase()).append(".").append(sqlEventData.getTargetTable());
                 sqlBuilder.append(" WHERE ");
                 sqlBuilder.append(String.join("and ", wheres));
-                eventBus.send(ConsumerAddress.EXECUTE_SQL_DELETE, sqlBuilder.toString());
+                delete(sqlBuilder.toString());
                 break;
 
             //update
@@ -108,13 +131,73 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
                 sqlBuilder.append(String.join(", ", updates));
                 sqlBuilder.append(" WHERE ");
                 sqlBuilder.append(String.join("AND ", wheres));
-                eventBus.send(ConsumerAddress.EXECUTE_SQL_UPDATE, sqlBuilder.toString());
+                update(sqlBuilder.toString());
                 break;
 
             //不做处理
             default:
                 break;
         }
+        System.out.println(sqlBuilder.toString());
+    }
+
+    /**
+     * 执行查询
+     *
+     * @param sql
+     */
+    private void query(String sql) {
+        log.info(sql);
+        sqlClient.query(sql, res -> {
+            if (!res.succeeded()) {
+                log.error("sql-query-->失败:", res.cause());
+            }
+        });
+    }
+
+    /**
+     * 执行更新
+     *
+     * @param sql
+     */
+    private void update(String sql) {
+        log.info(sql);
+        sqlClient.update(sql, res -> {
+            if (!res.succeeded()) {
+                res.cause().printStackTrace();
+                log.error("sql-update-->失败:", res.cause());
+            }
+        });
+    }
+
+    /**
+     * 执行删除
+     *
+     * @param sql
+     */
+    private void delete(String sql) {
+        log.info(sql);
+        sqlClient.update(sql, res -> {
+            if (!res.succeeded()) {
+                res.cause().printStackTrace();
+                log.error("sql-delete:", res.cause());
+            }
+        });
+    }
+
+    /**
+     * 执行新增
+     *
+     * @param sql
+     */
+    private void insert(String sql) {
+        log.info(sql);
+        sqlClient.update(sql, res -> {
+            if (!res.succeeded()) {
+                res.cause().printStackTrace();
+                log.error("sql-insert:", res.cause());
+            }
+        });
     }
 
 }

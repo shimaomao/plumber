@@ -1,8 +1,11 @@
 package com.hebaibai.plumber.config;
 
 import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.SqlEventData;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,5 +31,7 @@ public class Config {
     private DataTargetConfig dataTargetConfig;
 
     private Set<EventHandler> eventHandlers;
+
+    private List<SqlEventDataExecuter> sqlEventDataExecuters;
 
 }
