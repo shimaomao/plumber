@@ -68,6 +68,11 @@ public class BinlogEventListener implements BinaryLogClient.EventListener {
             tableIdMapping.seveDatabaseName(tableId, databaseName);
             return;
         }
+        if (EventType.GTID == eventType) {
+            GtidEventData eventData = event.getData();
+            log.warn("table structure changed, an error maybe occur, {} {}", eventData.getGtid(), eventData.getFlags());
+            return;
+        }
         if (eventHandlers == null) {
             return;
         }
