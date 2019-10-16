@@ -40,21 +40,11 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
         String[] rows = EventDataUtils.getDeleteRows(data);
         List<String> columns = sourceTableMateData.getColumns();
         Map<String, String> eventAfterData = new HashMap<>();
-        List<String> wheres = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             String sourceName = columns.get(i);
             String value = rows[i];
-            boolean isKey = key.equals(sourceName) && mapping.containsKey(sourceName);
             String targetName = mapping.get(sourceName);
             eventAfterData.put(targetName, value);
-            if (!isKey) {
-                continue;
-            }
-            if (value == null) {
-                wheres.add(targetName + " = null ");
-            } else {
-                wheres.add("`" + targetName + "`" + " = '" + value + "' ");
-            }
         }
         //填充插件数据
         SqlEventData eventPluginData = new SqlEventData(SqlEventData.TYPE_DELETE);
@@ -72,13 +62,6 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
                 log.error(eventPlugin.getClass().getName(), e);
             }
         }
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("DELETE FROM ");
-        sqlBuilder.append(targetDatabase).append(".").append(targetTable);
-        sqlBuilder.append(" WHERE ");
-        sqlBuilder.append(String.join("and ", wheres));
-        String sql = sqlBuilder.toString();
-        eventBus.send(ConsumerAddress.EXECUTE_SQL_DELETE, sql);
     }
 
     @Override

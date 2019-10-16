@@ -82,6 +82,11 @@ public class Main {
     public static final String PRIMARY_KEY = "primary-key";
 
     /**
+     * 执行数据节点
+     */
+    public static final String EXECUTER = "executer";
+
+    /**
      * 配置实例
      */
     private static Config config;
@@ -160,7 +165,7 @@ public class Main {
      * @return
      */
     private static void eventPlugins(JSONObject configJson) throws IllegalAccessException, InstantiationException {
-        JSONObject pluginJson = configJson.getJSONObject("plugin");
+        JSONObject pluginJson = configJson.getJSONObject(EXECUTER);
         List<SqlEventDataExecuter> eventPlugins = new ArrayList<>();
         if (pluginJson != null) {
             for (Map.Entry<String, Object> entry : pluginJson.entrySet()) {

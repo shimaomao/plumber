@@ -39,8 +39,6 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
     public void handle(EventBus eventBus, EventData data) {
         String[] rows = EventDataUtils.getInsertRows(data);
         List<String> columns = sourceTableMateData.getColumns();
-        List<String> targetColumns = new ArrayList<>();
-        List<String> targetColumnValues = new ArrayList<>();
         Map<String, String> eventAfterData = new HashMap<>();
         for (int i = 0; i < columns.size(); i++) {
             String sourceName = columns.get(i);
@@ -53,14 +51,7 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
             if (targetName == null) {
                 continue;
             }
-            targetColumns.add("`" + targetName + "`");
-            if (value == null) {
-                targetColumnValues.add("null");
-            } else {
-                targetColumnValues.add("'" + value + "'");
-            }
             eventAfterData.put(targetName, value);
-
         }
         //填充插件数据
         SqlEventData eventPluginData = new SqlEventData(SqlEventData.TYPE_INSERT);
@@ -78,14 +69,6 @@ public class InsertEventHandlerImpl extends AbstractEventHandler implements Even
                 log.error(eventPlugin.getClass().getName(), e);
             }
         }
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("REPLACE INTO ");
-        sqlBuilder.append(targetDatabase).append(".").append(targetTable);
-        sqlBuilder.append(" ( ").append(String.join(", ", targetColumns));
-        sqlBuilder.append(" ) VALUES ( ").append(String.join(", ", targetColumnValues));
-        sqlBuilder.append(");");
-        String sql = sqlBuilder.toString();
-        eventBus.send(ConsumerAddress.EXECUTE_SQL_INSERT, sql);
     }
 
     @Override
