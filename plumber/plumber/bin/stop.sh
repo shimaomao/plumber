@@ -6,7 +6,7 @@ cd ../
 # 项目路径
 DEPLOY_DIR=`pwd`
 
-PID=`ps -ef | grep "$DEPLOY_DIR" | grep -v 'grep' | awk '{print $2}'`
+PID=`ps -ef | grep java | grep "$DEPLOY_DIR" | grep -v grep | awk '{print $2}'`
 
 if [ -n "$PID" ]; then
     echo PID: $PID
