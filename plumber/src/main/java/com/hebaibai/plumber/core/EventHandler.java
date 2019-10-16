@@ -1,12 +1,12 @@
-package com.hebaibai.plumber.core.handler;
+package com.hebaibai.plumber.core;
 
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.eventbus.EventBus;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * binlog的事件处理器
@@ -15,6 +15,10 @@ import java.util.Set;
  */
 public interface EventHandler {
 
+    /**
+     * 添加事件处理插件
+     */
+    void addPlugin(SqlEventDataExecuter eventPlugin);
 
     /**
      * 设置目标数据源
@@ -79,7 +83,7 @@ public interface EventHandler {
     /**
      * 来源表中的key
      *
-     * @param keys
+     * @param key
      */
-    void setKeys(Set<String> keys);
+    void setKey(String key);
 }

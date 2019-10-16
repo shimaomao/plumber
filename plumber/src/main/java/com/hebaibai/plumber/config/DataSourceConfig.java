@@ -1,4 +1,4 @@
-package com.hebaibai.plumber;
+package com.hebaibai.plumber.config;
 
 import lombok.Data;
 import lombok.Getter;

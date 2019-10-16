@@ -1,15 +1,12 @@
 package com.hebaibai.plumber.core.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
-import io.vertx.core.logging.JULLogDelegateFactory;
-import io.vertx.core.spi.logging.LogDelegate;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 公用默认实现
@@ -35,7 +32,9 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected Map<String, String> mapping;
 
-    protected Set<String> keys;
+    protected String key;
+
+    protected List<SqlEventDataExecuter> eventPlugins = new ArrayList<>();
 
     @Override
     public void setSource(TableMateData tableMateData) {
@@ -62,8 +61,16 @@ public abstract class AbstractEventHandler implements EventHandler {
     }
 
     @Override
-    public void setKeys(Set<String> keys) {
-        this.keys = keys;
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    @Override
+    public void addPlugin(SqlEventDataExecuter eventPlugin) {
+        if (eventPlugin == null) {
+            return;
+        }
+        this.eventPlugins.add(eventPlugin);
     }
 
     @Override
@@ -74,7 +81,7 @@ public abstract class AbstractEventHandler implements EventHandler {
             put("targetTable", targetTable);
             put("sourceDatabase", sourceDatabase);
             put("sourceTable", sourceTable);
-            put("keys", keys);
+            put("key", key);
             put("mapping", mapping);
         }};
         return JSONObject.toJSONString(map);

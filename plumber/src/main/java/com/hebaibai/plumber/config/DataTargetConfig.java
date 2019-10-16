@@ -1,4 +1,4 @@
-package com.hebaibai.plumber;
+package com.hebaibai.plumber.config;
 
 import io.vertx.core.json.JsonObject;
 import lombok.Data;

@@ -2,8 +2,13 @@ package com.hebaibai.plumber;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hebaibai.plumber.core.handler.EventHandler;
+import com.hebaibai.plumber.config.Config;
+import com.hebaibai.plumber.config.DataSourceConfig;
+import com.hebaibai.plumber.config.DataTargetConfig;
+import com.hebaibai.plumber.core.EventHandler;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
+import com.hebaibai.plumber.core.executer.MysqlEventExecuter;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import io.vertx.core.Context;
@@ -77,6 +82,11 @@ public class Main {
     public static final String PRIMARY_KEY = "primary-key";
 
     /**
+     * 执行数据节点
+     */
+    public static final String EXECUTER = "executer";
+
+    /**
      * 配置实例
      */
     private static Config config;
@@ -99,7 +109,7 @@ public class Main {
      * @throws ParseException
      * @throws IOException
      */
-    public static void main(String[] args) throws SQLException, ParseException, IOException {
+    public static void main(String[] args) throws SQLException, ParseException, IOException, InstantiationException, IllegalAccessException {
         log.info("Main start ... ");
         config = new Config();
         JSONObject configJson = getConf(args);
@@ -129,8 +139,11 @@ public class Main {
         //加载配置
         eventHandler(configJson);
 
-        //打印日志
+        //加载插件
+        eventPlugins(configJson);
+
         for (EventHandler handler : config.getEventHandlers()) {
+            //打印日志
             log.debug("init EventHandler: {}", handler);
         }
 
@@ -143,6 +156,39 @@ public class Main {
         plumberLancher.start(config);
         log.info("Main start success ...");
 
+    }
+
+    /**
+     * 加载插件
+     *
+     * @param configJson
+     * @return
+     */
+    private static void eventPlugins(JSONObject configJson) throws IllegalAccessException, InstantiationException {
+        JSONObject pluginJson = configJson.getJSONObject(EXECUTER);
+        List<SqlEventDataExecuter> eventDataExecuters = new ArrayList<>();
+        if (pluginJson != null) {
+            for (Map.Entry<String, Object> entry : pluginJson.entrySet()) {
+                String pluginName = entry.getKey();
+                JSONObject jsonObject = pluginJson.getJSONObject(pluginName);
+                Class<? extends SqlEventDataExecuter> eventDataExecuterClass = SqlEventDataExecuter.EVENT_PLUGIN_MAP.get(pluginName);
+                if (eventDataExecuterClass == null) {
+                    throw new RuntimeException("executer not find");
+                }
+                SqlEventDataExecuter eventPlugin = eventDataExecuterClass.newInstance();
+                eventPlugin.setConfig(jsonObject);
+                eventDataExecuters.add(eventPlugin);
+            }
+        }
+        if (eventDataExecuters.size() == 0) {
+            throw new RuntimeException("executer not find");
+        }
+        config.setSqlEventDataExecuters(eventDataExecuters);
+        for (EventHandler handler : config.getEventHandlers()) {
+            for (SqlEventDataExecuter eventPlugin : eventDataExecuters) {
+                handler.addPlugin(eventPlugin);
+            }
+        }
     }
 
     /**
@@ -204,14 +250,11 @@ public class Main {
         eventHandler.setMapping(map);
 
         //id
-        Set<String> keys = new HashSet<>();
         String id = source.getId();
         if (id == null || id.length() == 0) {
             throw new RuntimeException(table + " primary key not find");
         }
-        keys.add(id);
-        eventHandler.setKeys(keys);
-
+        eventHandler.setKey(id);
         return eventHandler;
     }
 
@@ -259,20 +302,17 @@ public class Main {
             }
         }
         //id如果有配置，按照配置
-        Set<String> keys = new HashSet<>();
-        eventHandler.setKeys(keys);
         if (eventHandlerJson.containsKey(PRIMARY_KEY)) {
             String id = eventHandlerJson.getString(PRIMARY_KEY);
-            keys.add(id);
+            eventHandler.setKey(id);
         } else {
             //数据来源表中的主键
             String id = targetMateData.getId();
             if (id == null || id.length() == 0) {
                 throw new RuntimeException(targetMateData.getNama() + " primary key not find");
             }
-            keys.add(id);
+            eventHandler.setKey(id);
         }
-
         return eventHandler;
     }
 

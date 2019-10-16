@@ -4,13 +4,14 @@ import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.ConsumerAddress;
+import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.SqlEventData;
+import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 更新事件处理器
@@ -37,43 +38,38 @@ public class UpdateEventHandlerImpl extends AbstractEventHandler implements Even
         String[] after = EventDataUtils.getAfterUpdate(data);
         //拼装sql需要的数据
         List<String> columns = sourceTableMateData.getColumns();
-        List<String> updateColumns = new ArrayList<>();
-        List<String> updateKeyColumns = new ArrayList<>();
+        Map<String, String> eventBeforData = new HashMap<>();
+        Map<String, String> eventAfterData = new HashMap<>();
+
         for (int i = 0; i < columns.size(); i++) {
             String sourceName = columns.get(i);
-            //是否是key
-            boolean isKey = keys.contains(sourceName) && mapping.containsKey(sourceName);
-            //不是key或者数据没有变化的，跳过
-            if (!isKey && Objects.equals(befor[i], after[i])) {
-                continue;
-            }
             String targetName = mapping.get(sourceName);
             if (targetName == null) {
                 continue;
             }
-            //如果是key，以key为条件执行更新
-            if (isKey) {
-                updateKeyColumns.add("`" + targetName + "` = '" + befor[i] + "'");
-            }
-            if (after[i] == null) {
-                updateColumns.add("`" + targetName + "` = null");
-            } else {
-                updateColumns.add("`" + targetName + "` = '" + after[i] + "'");
+            //设置更新前的数据
+            eventBeforData.put(targetName, befor[i]);
+            //设置更新后的数据
+            eventAfterData.put(targetName, after[i]);
+        }
+        //填充插件数据
+        SqlEventData eventPluginData = new SqlEventData(SqlEventData.TYPE_UPDATE);
+        //添加变动前的数据
+        eventPluginData.setBefor(eventBeforData);
+        //添加变动后的数据
+        eventPluginData.setAfter(eventAfterData);
+        eventPluginData.setSourceDatabase(this.sourceDatabase);
+        eventPluginData.setSourceTable(this.sourceTable);
+        eventPluginData.setTargetDatabase(this.targetDatabase);
+        eventPluginData.setTargetTable(this.targetTable);
+        eventPluginData.setKey(mapping.get(this.key));
+        for (SqlEventDataExecuter eventPlugin : eventPlugins) {
+            try {
+                eventPlugin.execute(eventPluginData);
+            } catch (Exception e) {
+                log.error(eventPlugin.getClass().getName(), e);
             }
         }
-
-        if (updateColumns.size() == 0) {
-            return;
-        }
-
-        //拼装sql
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("UPDATE ").append(targetDatabase).append(".").append(targetTable).append(" SET ");
-        sqlBuilder.append(String.join(", ", updateColumns));
-        sqlBuilder.append(" WHERE ");
-        sqlBuilder.append(String.join("AND ", updateKeyColumns));
-        String sql = sqlBuilder.toString();
-        eventBus.send(ConsumerAddress.EXECUTE_SQL_UPDATE, sql);
     }
 
     @Override
