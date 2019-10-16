@@ -7,6 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 处理建表语句,获取相关信息
+ *
  * @author hjx
  */
 public class SqlUtils {

@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.Objects;
 
 /**
- * 用于数据库的链接
+ * 收据来源配置
  *
  * @author hjx
  */

@@ -4,6 +4,8 @@ import io.vertx.core.json.JsonObject;
 import lombok.Data;
 
 /**
+ * 数据目标配置
+ *
  * @author hjx
  */
 @Data

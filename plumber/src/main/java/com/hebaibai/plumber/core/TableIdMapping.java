@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 数据库元数据
+ * 数据库binlig事件id对应的表名称
+ *
  * @author hjx
  */
 public class TableIdMapping {

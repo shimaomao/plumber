@@ -12,7 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 
 /**
- * 获取binlog
+ * 获取binlog的Verticle
+ *
  * @author hjx
  */
 @Slf4j

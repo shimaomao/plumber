@@ -10,6 +10,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * 执行数据库操作Verticle
+ *
  * @author hjx
  */
 @Slf4j

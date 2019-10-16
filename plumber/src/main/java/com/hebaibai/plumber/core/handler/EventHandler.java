@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * binlog的事件处理器
+ *
  * @author hjx
  */
 public interface EventHandler {

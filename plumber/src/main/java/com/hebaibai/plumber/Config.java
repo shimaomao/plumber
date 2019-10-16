@@ -6,6 +6,8 @@ import lombok.Data;
 import java.util.Set;
 
 /**
+ * 程序配置
+ *
  * @author hjx
  */
 @Data
