@@ -15,10 +15,15 @@ mysql开启binlog记录, 格式为ROW
 
 1. git clone https://github.com/hjx601496320/plumber.git
 2. cd plumber/plumber/
-3. 在 target目录得到 plumber-0.0.1-SNAPSHOT-jar-with-dependencies.jar, 修改名称为:**plumber.jar**
-4. 使用命令: `java -jar plumber.jar -c config.json`启动
+3. mvn package
+4. cd target/
+5. tar -zxvf plumber.tar.gz
+6. cd plumber/ 并修改config/config.json
+7. 执行 sh bin/start.sh 启动
 
-## 配置文件:config.json
+#### 注意:
+
+启动脚本目前只支持linux系统, win脚本不会写 /(ㄒoㄒ)/~~
 
 ### 节点说明:
 
