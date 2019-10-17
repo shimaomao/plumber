@@ -1,15 +1,15 @@
-package com.hebaibai.plumber.config;
+package com.hebaibai.plumber.core.executer;
 
 import io.vertx.core.json.JsonObject;
 import lombok.Data;
 
 /**
- * 数据目标配置
+ * mysql 数据目标配置
  *
  * @author hjx
  */
 @Data
-public class DataTargetConfig {
+public class MysqlDataSourceConfig {
 
     private String host;
     private int port;

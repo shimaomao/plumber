@@ -3,15 +3,13 @@ package com.hebaibai.plumber.core.handler;
 import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
-import com.hebaibai.plumber.ConsumerAddress;
 import com.hebaibai.plumber.core.EventHandler;
-import com.hebaibai.plumber.core.SqlEventDataExecuter;
+import com.hebaibai.plumber.core.EventDataExecuter;
 import com.hebaibai.plumber.core.SqlEventData;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import io.vertx.core.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +53,7 @@ public class DeleteEventHandlerImpl extends AbstractEventHandler implements Even
         eventPluginData.setTargetDatabase(this.targetDatabase);
         eventPluginData.setTargetTable(this.targetTable);
         eventPluginData.setKey(mapping.get(this.key));
-        for (SqlEventDataExecuter eventPlugin : eventPlugins) {
+        for (EventDataExecuter eventPlugin : eventPlugins) {
             try {
                 eventPlugin.execute(eventPluginData);
             } catch (Exception e) {

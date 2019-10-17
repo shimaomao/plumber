@@ -4,7 +4,7 @@ import com.github.shyiko.mysql.binlog.event.EventData;
 import com.github.shyiko.mysql.binlog.event.EventHeader;
 import com.github.shyiko.mysql.binlog.event.EventType;
 import com.hebaibai.plumber.core.EventHandler;
-import com.hebaibai.plumber.core.SqlEventDataExecuter;
+import com.hebaibai.plumber.core.EventDataExecuter;
 import com.hebaibai.plumber.core.utils.EventDataUtils;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import io.vertx.core.eventbus.EventBus;
@@ -109,7 +109,7 @@ public class InsertUpdateDeleteEventHandlerImpl extends AbstractEventHandler imp
     }
 
     @Override
-    public void addPlugin(SqlEventDataExecuter eventPlugin) {
+    public void addPlugin(EventDataExecuter eventPlugin) {
         for (AbstractEventHandler eventHandler : eventHandlers) {
             eventHandler.addPlugin(eventPlugin);
         }

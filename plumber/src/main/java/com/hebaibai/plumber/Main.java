@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hebaibai.plumber.config.Config;
 import com.hebaibai.plumber.config.DataSourceConfig;
-import com.hebaibai.plumber.config.DataTargetConfig;
 import com.hebaibai.plumber.core.EventHandler;
+import com.hebaibai.plumber.core.EventDataExecuter;
 import com.hebaibai.plumber.core.handler.InsertUpdateDeleteEventHandlerImpl;
-import com.hebaibai.plumber.core.SqlEventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import com.hebaibai.plumber.core.utils.TableMateDataUtils;
 import io.vertx.core.Context;
@@ -51,11 +50,6 @@ public class Main {
     public static final String DATA_SOURCE = "data-source";
 
     /**
-     * 数据目标
-     */
-    public static final String DATA_TARGET = "data-target";
-
-    /**
      * 数据同步
      */
     public static final String TABLE_SYNC_JOB = "table-sync-job";
@@ -96,11 +90,6 @@ public class Main {
     private static Connection dataSourceConn;
 
     /**
-     * 数据目标链接
-     */
-    private static Connection dataTargetConn;
-
-    /**
      * 入口
      *
      * @param args
@@ -117,15 +106,9 @@ public class Main {
         DataSourceConfig dataSource = configJson.getObject(DATA_SOURCE, DataSourceConfig.class);
         config.setDataSourceConfig(dataSource);
 
-        //目标数据配置
-        DataTargetConfig dataTarget = configJson.getObject(DATA_TARGET, DataTargetConfig.class);
-        config.setDataTargetConfig(dataTarget);
 
         dataSourceConn = getConnection(
                 dataSource.getHost(), dataSource.getPort(), dataSource.getUsername(), dataSource.getPassword());
-
-        dataTargetConn = getConnection(
-                dataTarget.getHost(), dataTarget.getPort(), dataTarget.getUsername(), dataTarget.getPassword());
 
         //binlog name position
         if (configJson.containsKey(LOG_NAME)) {
@@ -165,16 +148,16 @@ public class Main {
      */
     private static void eventDataExecuters(JSONObject configJson) throws IllegalAccessException, InstantiationException {
         JSONObject pluginJson = configJson.getJSONObject(EXECUTER);
-        List<SqlEventDataExecuter> eventDataExecuters = new ArrayList<>();
+        List<EventDataExecuter> eventDataExecuters = new ArrayList<>();
         if (pluginJson != null) {
             for (Map.Entry<String, Object> entry : pluginJson.entrySet()) {
                 String pluginName = entry.getKey();
                 JSONObject jsonObject = pluginJson.getJSONObject(pluginName);
-                Class<? extends SqlEventDataExecuter> eventDataExecuterClass = SqlEventDataExecuter.EVENT_PLUGIN_MAP.get(pluginName);
+                Class<? extends EventDataExecuter> eventDataExecuterClass = EventDataExecuter.EVENT_PLUGIN_MAP.get(pluginName);
                 if (eventDataExecuterClass == null) {
                     throw new RuntimeException("executer not find");
                 }
-                SqlEventDataExecuter eventPlugin = eventDataExecuterClass.newInstance();
+                EventDataExecuter eventPlugin = eventDataExecuterClass.newInstance();
                 eventPlugin.setConfig(jsonObject);
                 eventDataExecuters.add(eventPlugin);
             }
@@ -184,7 +167,7 @@ public class Main {
         }
         config.setSqlEventDataExecuters(eventDataExecuters);
         for (EventHandler handler : config.getEventHandlers()) {
-            for (SqlEventDataExecuter eventPlugin : eventDataExecuters) {
+            for (EventDataExecuter eventPlugin : eventDataExecuters) {
                 handler.addPlugin(eventPlugin);
             }
         }
@@ -213,48 +196,12 @@ public class Main {
         DataSourceConfig sourceConfig = config.getDataSourceConfig();
         List<String> tables = tables(dataSourceConn, sourceConfig.getDatabase());
         for (String table : tables) {
-            EventHandler eventHandler = eventHandlerByTable(table);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(TARGET, table);
+            jsonObject.put(SOURCE, table);
+            EventHandler eventHandler = eventHandlerByJson(jsonObject);
             eventHandlers.add(eventHandler);
         }
-    }
-
-    /**
-     * 根据表名称加载 EventHandler
-     *
-     * @param table
-     * @return
-     */
-    private static EventHandler eventHandlerByTable(String table) throws SQLException {
-        DataSourceConfig sourceConfig = config.getDataSourceConfig();
-        String sourceDatabase = sourceConfig.getDatabase();
-        String targetDatabase = config.getDataTargetConfig().getDatabase();
-        String createSql = getCreateSql(dataSourceConn, sourceDatabase, table);
-        TableMateData source = TableMateDataUtils.getTableMateData(createSql, sourceDatabase);
-        TableMateData target = TableMateDataUtils.getTableMateData(createSql, targetDatabase);
-
-        //new
-        EventHandler eventHandler = new InsertUpdateDeleteEventHandlerImpl();
-        eventHandler.setStatus(true);
-
-        //source target
-        eventHandler.setSource(source);
-        eventHandler.setTarget(target);
-
-        //mapping
-        Map<String, String> map = new HashMap<>();
-        List<String> columns = source.getColumns();
-        for (String column : columns) {
-            map.put(column, column);
-        }
-        eventHandler.setMapping(map);
-
-        //id
-        String id = source.getId();
-        if (id == null || id.length() == 0) {
-            throw new RuntimeException(table + " primary key not find");
-        }
-        eventHandler.setKey(id);
-        return eventHandler;
     }
 
     /**
@@ -276,15 +223,13 @@ public class Main {
 
         //target table
         String targetTable = eventHandlerJson.getString(TARGET);
-        DataTargetConfig dataTargetConfig = config.getDataTargetConfig();
-        String targetSql = getCreateSql(dataTargetConn, dataTargetConfig.getDatabase(), targetTable);
-        TableMateData targetMateData = TableMateDataUtils.getTableMateData(targetSql, dataTargetConfig.getDatabase());
+        TableMateData targetMateData = new TableMateData();
+        targetMateData.setNama(targetTable);
         eventHandler.setTarget(targetMateData);
-
-        //mapping
+        //字段转换 mapping
         Map<String, String> map = new HashMap<>();
         eventHandler.setMapping(map);
-        //mapping != null , 两个表数据结构不相同( 数据转换同步 )
+        //MAPPING 存在 , 两个表数据结构不相同( 数据转换同步 )
         if (eventHandlerJson.containsKey(MAPPING)) {
             JSONObject mapping = eventHandlerJson.getJSONObject(MAPPING);
             Set<String> keySet = mapping.keySet();
@@ -293,25 +238,32 @@ public class Main {
                 String key = iterator.next();
                 map.put(key, mapping.getString(key));
             }
-        } else {
+        }
+        //MAPPING 不存在 , 两个表数据结构相同( 数据直接同步 )
+        else {
             //mapping = null , 两个表数据结构相同( 数据直接同步 )
-            List<String> columns = targetMateData.getColumns();
+            List<String> columns = sourceMateData.getColumns();
             for (String column : columns) {
                 map.put(column, column);
             }
         }
-        //id如果有配置，按照配置
+        String key = null;
+        //id有配置，按照配置
         if (eventHandlerJson.containsKey(PRIMARY_KEY)) {
-            String id = eventHandlerJson.getString(PRIMARY_KEY);
-            eventHandler.setKey(id);
-        } else {
-            //数据来源表中的主键
-            String id = targetMateData.getId();
-            if (id == null || id.length() == 0) {
-                throw new RuntimeException(targetMateData.getNama() + " primary key not find");
-            }
-            eventHandler.setKey(id);
+            key = eventHandlerJson.getString(PRIMARY_KEY);
         }
+        //id有没有配置，按照来源表中的id
+        else {
+            key = sourceMateData.getId();
+            if (key == null || key.length() == 0) {
+                throw new RuntimeException(sourceMateData.getNama() + " primary key not find");
+            }
+        }
+        // mapping 中要包含 PRIMARY_KEY 字段
+        if (!map.containsKey(key)) {
+            throw new RuntimeException("not find primary key in mapping");
+        }
+        eventHandler.setKey(key);
         return eventHandler;
     }
 

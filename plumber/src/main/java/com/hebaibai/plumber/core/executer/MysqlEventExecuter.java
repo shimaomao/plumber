@@ -1,14 +1,10 @@
 package com.hebaibai.plumber.core.executer;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hebaibai.plumber.ConsumerAddress;
 import com.hebaibai.plumber.config.Config;
-import com.hebaibai.plumber.config.DataTargetConfig;
 import com.hebaibai.plumber.core.SqlEventData;
-import com.hebaibai.plumber.core.SqlEventDataExecuter;
+import com.hebaibai.plumber.core.EventDataExecuter;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.MySQLClient;
@@ -25,16 +21,20 @@ import java.util.Objects;
  * @author hjx
  */
 @Slf4j
-public class MysqlEventExecuter implements SqlEventDataExecuter {
+public class MysqlEventExecuter implements EventDataExecuter {
 
     /**
      * 异步的数据库操作客户端
      */
     private AsyncSQLClient sqlClient;
 
+    /**
+     * 数据库配置
+     */
+    private MysqlDataSourceConfig dataTargetConfig;
+
     @Override
     public void init(Vertx vertx, Config config) {
-        DataTargetConfig dataTargetConfig = config.getDataTargetConfig();
         JsonObject json = dataTargetConfig.getJson();
         log.debug("sql client :{}", json);
         sqlClient = MySQLClient.createShared(vertx, json, "plumber_pool:" + dataTargetConfig.getHost());
@@ -42,7 +42,11 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
 
     @Override
     public void setConfig(JSONObject config) {
-
+        if (config.containsKey(DATA_TARGET)) {
+            this.dataTargetConfig = config.getObject(DATA_TARGET, MysqlDataSourceConfig.class);
+        } else {
+            throw new RuntimeException(DATA_TARGET + "not find");
+        }
     }
 
     @Override
@@ -67,7 +71,7 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
                     }
                 }
                 sqlBuilder.append("REPLACE INTO ");
-                sqlBuilder.append(sqlEventData.getTargetDatabase()).append(".").append(sqlEventData.getTargetTable());
+                sqlBuilder.append(sqlEventData.getTargetTable());
                 sqlBuilder.append(" ( ").append(String.join(", ", columns));
                 sqlBuilder.append(" ) VALUES ( ").append(String.join(", ", columnValues));
                 sqlBuilder.append(");");
@@ -91,7 +95,7 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
                     }
                 }
                 sqlBuilder.append("DELETE FROM ");
-                sqlBuilder.append(sqlEventData.getTargetDatabase()).append(".").append(sqlEventData.getTargetTable());
+                sqlBuilder.append(sqlEventData.getTargetTable());
                 sqlBuilder.append(" WHERE ");
                 sqlBuilder.append(String.join("and ", wheres));
                 delete(sqlBuilder.toString());
@@ -126,7 +130,7 @@ public class MysqlEventExecuter implements SqlEventDataExecuter {
                     break;
                 }
                 sqlBuilder.append("UPDATE ")
-                        .append(sqlEventData.getTargetDatabase()).append(".").append(sqlEventData.getTargetTable())
+                        .append(sqlEventData.getTargetTable())
                         .append(" SET ");
                 sqlBuilder.append(String.join(", ", updates));
                 sqlBuilder.append(" WHERE ");

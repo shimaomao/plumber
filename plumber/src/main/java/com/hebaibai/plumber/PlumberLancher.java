@@ -1,7 +1,7 @@
 package com.hebaibai.plumber;
 
 import com.hebaibai.plumber.config.Config;
-import com.hebaibai.plumber.core.SqlEventDataExecuter;
+import com.hebaibai.plumber.core.EventDataExecuter;
 import com.hebaibai.plumber.verticle.BinLogVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
@@ -38,7 +38,7 @@ public class PlumberLancher {
      */
     public void start(Config config) {
         //初始化Executer
-        for (SqlEventDataExecuter sqlEventDataExecuter : config.getSqlEventDataExecuters()) {
+        for (EventDataExecuter sqlEventDataExecuter : config.getSqlEventDataExecuters()) {
             sqlEventDataExecuter.init(vertx, config);
         }
         BinLogVerticle binLogVerticle = new BinLogVerticle(config);

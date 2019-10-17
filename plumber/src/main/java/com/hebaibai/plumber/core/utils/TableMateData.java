@@ -13,10 +13,19 @@ import java.util.Map;
 @Data
 public class TableMateData {
 
+    /**
+     * 表名称
+     */
     private String nama;
 
+    /**
+     * id 名称
+     */
     private String id;
 
+    /**
+     * 库名称
+     */
     private String dataBase;
 
     private List<String> columns;

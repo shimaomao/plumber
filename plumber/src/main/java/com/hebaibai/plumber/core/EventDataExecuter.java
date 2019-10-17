@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.hebaibai.plumber.config.Config;
 import com.hebaibai.plumber.core.executer.MysqlEventExecuter;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +13,17 @@ import java.util.Map;
  *
  * @author hjx
  */
-public interface SqlEventDataExecuter {
+public interface EventDataExecuter {
+
+    /**
+     * 数据目标
+     */
+    String DATA_TARGET = "data-target";
 
     /**
      * 现有的插件
      */
-    Map<String, Class<? extends SqlEventDataExecuter>> EVENT_PLUGIN_MAP = new HashMap() {{
+    Map<String, Class<? extends EventDataExecuter>> EVENT_PLUGIN_MAP = new HashMap() {{
         put(MysqlEventExecuter.class.getSimpleName(), MysqlEventExecuter.class);
     }};
 

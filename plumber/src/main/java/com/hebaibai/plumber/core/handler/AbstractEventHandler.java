@@ -2,7 +2,7 @@ package com.hebaibai.plumber.core.handler;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hebaibai.plumber.core.EventHandler;
-import com.hebaibai.plumber.core.SqlEventDataExecuter;
+import com.hebaibai.plumber.core.EventDataExecuter;
 import com.hebaibai.plumber.core.utils.TableMateData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +34,7 @@ public abstract class AbstractEventHandler implements EventHandler {
 
     protected String key;
 
-    protected List<SqlEventDataExecuter> eventPlugins = new ArrayList<>();
+    protected List<EventDataExecuter> eventPlugins = new ArrayList<>();
 
     @Override
     public void setSource(TableMateData tableMateData) {
@@ -66,7 +66,7 @@ public abstract class AbstractEventHandler implements EventHandler {
     }
 
     @Override
-    public void addPlugin(SqlEventDataExecuter eventPlugin) {
+    public void addPlugin(EventDataExecuter eventPlugin) {
         if (eventPlugin == null) {
             return;
         }

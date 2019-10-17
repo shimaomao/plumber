@@ -30,15 +30,14 @@ mysql开启binlog记录, 格式为ROW
 -   **log-name**:binlog 名称(默认为最新文件)
 -   **log-position**:binlog 开始位置(默认为后位置)
 -   **data-source**:数据来源
--   **data-target**:数据目标
 -   **executer**:数据持久化执行工具配置, **目前只支持mysql**, 后续添加更多
     -   **MysqlEventExecuter**: mysql的持久化工具
--   **table-sync-job**:事件处理, 数组 (不配置的话整个库同步)
-
-    -    **primary-key**:更新,删除条件字段 
+        -   **data-target**:数据目标配置
+-   **table-sync-job**:事件处理, 数组 (不配置的话整个库同步,认为表结构完全一致)
+    -    **primary-key**:更新,删除条件字段. 默认数据库id.
     -    **source**:数据来源库的表
     -    **target**:数据目标库的表
-    -    **mapping**:字段映射. key:来源表字段名称, value:目标表字段名称
+    -    **mapping**:字段映射. key:来源表字段名称, value:目标表字段名称. (必须包含primary-key, 例如primary-key为"tableId", 那么mapping 中必须包含"tableId")
 
 ### 1:直接同步数据 ( 不转换数据 )
 
@@ -53,16 +52,15 @@ mysql开启binlog记录, 格式为ROW
         "username":"root",
         "password":"00000"
     },
-    "data-target":{
-        "host":"127.0.0.1",
-        "database":"dbname",
-        "port":3306,
-        "username":"root",
-        "password":"00000"
-    },
     "executer":{
         "MysqlEventExecuter":{
-
+            "data-target":{
+                "host":"127.0.0.1",
+                "database":"dbname",
+                "port":3306,
+                "username":"root",
+                "password":"00000"
+            }
         }
     },
     "table-sync-job":[
@@ -87,16 +85,15 @@ mysql开启binlog记录, 格式为ROW
         "username":"root",
         "password":"00000"
     },
-    "data-target":{
-        "host":"127.0.0.1",
-        "database":"dbname",
-        "port":3306,
-        "username":"root",
-        "password":"00000"
-    },
     "executer":{
         "MysqlEventExecuter":{
-
+            "data-target":{
+                "host":"127.0.0.1",
+                "database":"dbname",
+                "port":3306,
+                "username":"root",
+                "password":"00000"
+            }
         }
     },
     "table-sync-job":[
@@ -126,16 +123,15 @@ mysql开启binlog记录, 格式为ROW
         "username":"root",
         "password":"00000"
     },
-    "data-target":{
-        "host":"127.0.0.1",
-        "database":"dbname",
-        "port":3306,
-        "username":"root",
-        "password":"00000"
-    },
     "executer":{
         "MysqlEventExecuter":{
-
+            "data-target":{
+                "host":"127.0.0.1",
+                "database":"dbname",
+                "port":3306,
+                "username":"root",
+                "password":"00000"
+            }
         }
     }
 }
