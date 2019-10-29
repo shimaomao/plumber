@@ -247,6 +247,7 @@ public class Main {
                 map.put(column, column);
             }
         }
+        //TODO 联合主键现在没有处理
         String key = null;
         //id有配置，按照配置
         if (eventHandlerJson.containsKey(PRIMARY_KEY)) {
@@ -261,7 +262,7 @@ public class Main {
         }
         // mapping 中要包含 PRIMARY_KEY 字段
         if (!map.containsKey(key)) {
-            throw new RuntimeException(sourceMateData.getNama() + "not find primary key in mapping");
+            throw new RuntimeException(sourceMateData.getNama() + " not find primary key in mapping");
         }
         eventHandler.setKey(key);
         return eventHandler;
